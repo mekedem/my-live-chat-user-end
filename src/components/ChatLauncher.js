@@ -30,15 +30,20 @@ const useStyles = makeStyles((theme) => ({
 const ChatLauncher = () => {
   const classes = useStyles();
   const [launcheropen, setLauncher] = React.useState(false)
+  const [firstTime, setFirstTime] = React.useState(true);
+
+  const handleFirstTime = () => {
+    setFirstTime(false);
+  }
 
   const handleClick = () => {
     setLauncher(!launcheropen);
-}
+  }
 
   return (
     <div className={classes.root}>
       <div className={classes.chat_window}>
-      {launcheropen && <Chatwindow />}
+      {launcheropen && <Chatwindow firstTime={firstTime} handleFirstTime={handleFirstTime}/>}
       </div>
       <Fab color="primary" aria-label="add" className={classes.fab} onClick={handleClick}>
        {!launcheropen && <ChatBubbleRoundedIcon />}

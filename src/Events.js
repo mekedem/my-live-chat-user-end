@@ -1,0 +1,7 @@
+module.exports = {
+    MESSAGE: 'MESSAGE',
+    AGENTASSIGNED: 'AGENTASSIGNED',
+    GETANAGENT: 'GETANAGENT',
+    TOKEN: 'TOKEN',
+    OFFLINE: 'OFFLINE'
+};

@@ -31,19 +31,36 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function Register() {
+export default function Register(props) {
   const classes = useStyles();
+  const [userEmail, setUserEmail] = React.useState('');
+  const [checked, setChecked] = React.useState(false);
+
+  const handleOnChangeEmail = (e) => {
+    setUserEmail(e.target.value);
+  }
+  const handleCheckedIcon = () => {
+    setChecked(!checked)
+  }
+
+  const validateEmail = (email) => {
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  }
 
   const startChat = (e) => {
     e.preventDefault();
-  
+    if(validateEmail(userEmail) && checked){
+      props.passEmail(userEmail);
+      props.handleFirstTime();
+    }
   }
 
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
-        <form className={classes.form} Validate>
+        <form className={classes.form}>
           <Grid container spacing={2}>
             <Grid item xs={12} className={classes.welcome}>
               <Box p={6}>
@@ -60,15 +77,20 @@ export default function Register() {
                 required
                 fullWidth
                 id="email"
+                type="email"
                 label="Email Address"
                 name="email"
+                value={userEmail}
+                onChange={handleOnChangeEmail}
                 autoComplete="email"
               />
             </Grid>
             <Grid item xs={12} sm={2}>
             <Checkbox
-        checked={false}
-        inputProps={{ 'aria-label': 'primary checkbox' }}
+            color="default"
+            inputProps={{ 'aria-label': 'checkbox with default color' }}
+            onChange={handleCheckedIcon}
+            checked={checked}
       />
         </Grid>
         <Grid item xs={12} sm={10}>
