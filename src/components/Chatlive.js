@@ -98,7 +98,9 @@ const Chatlive = (props) => {
     const [input, setInput] = React.useState("");
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [pickerVisible, setPickerVisible] = React.useState(false);
-    const {isFirstTime, chatMessages, setChatMessages} = props;
+    const {isFirstTime, chatMessages, setChatMessages, assignedAgentName, setAssignedAgentName} = props;
+    const [ioconnected, setioconnected] = React.useState(false);
+    const scrollbars = React.useRef(null);
     // check cookie if the visitor has been to this site if so send token
     React.useEffect(() => {
         const token = getCookie('conversationToken');
@@ -107,13 +109,18 @@ const Chatlive = (props) => {
         socket.emit(GETANAGENT,{}, (error) => {
           if(error) {
             alert(error);
+            setioconnected(false);
           }
+        //   console.log("here emitted");
+        //   else{
+        //       setioconnected(true);
+        //   }
         });
       }, [ENDPOINT, isFirstTime]);
 
     React.useEffect(() => {
         socket.on(AGENTASSIGNED, ({ name, avatarURL }) => {
-        //   props.setAssignedAgentName(name);
+        setAssignedAgentName(name);
         //   props.setAvatarURL(avatarURL);
         //   console.log("agent assigned console.log");
         });
@@ -121,7 +128,7 @@ const Chatlive = (props) => {
         socket.on(MESSAGE, ({ body, time }) => {
             const incomming = {incomming : true};
             setChatMessages(chatMessages => [ ...chatMessages, {body,time,incomming} ]);
-            // setIncomming(true);
+            scrollbars.current.scrollToBottom();
             // console.log("this is the body of the message received", body);
             // also display the time with the message in object form 
         });
@@ -135,6 +142,7 @@ const Chatlive = (props) => {
         });
 
         socket.on('connect', () => {
+            setioconnected(true);
             console.log('socket connected');
         });
 
@@ -168,15 +176,17 @@ const Chatlive = (props) => {
 
     const sendMessage = (e) => {
         e.preventDefault();
-        if(input) {
+        if(input && ioconnected) {
             const msg = { body: input, time: Date.now(), incomming: false};
             socket.emit(MESSAGE, msg);
             setChatMessages(chatMessages => [ ...chatMessages, msg ]); // push msg later on
-            // setIncomming(false);
+            scrollbars.current.scrollToBottom()
+            setInput("");
+            setPickerVisible(false);
         }
+        // console.log("no connection or empty message")
         // console.log(props.userEmail); the visitors email he enters at the beginning
-        setInput("");
-        setPickerVisible(false);
+        
     }
 
     // toggle emoji picker visibility
@@ -207,6 +217,10 @@ const Chatlive = (props) => {
     const closeEP = () => {
         setPickerVisible(false);
     }
+
+    // const handleScrollUpdate = (scrollBar) => {
+    //     scrollBar.scrollToBottom();
+    //  }
 
     return (
         <Card className={classes.root}>
@@ -246,11 +260,10 @@ const Chatlive = (props) => {
                         </Menu>
                     </CardActions>
                 }
-                title="somebody"
-                // props.assignedAgentName
+                title={assignedAgentName}
                 subheader="time"
             />
-            <Scrollbars style={{ width: "100%", height: "100%" }}>
+            <Scrollbars ref={scrollbars} style={{ width: "100%", height: "100%" }}>
                  <CardContent className={classes.chatbody}>
                     {chatMessages.map((msgitem) => {                
                     return <Typography variant="body2" color="textSecondary" component="p" className={msgitem.incomming ? classes.chatreceiver : classes.chatmessage}>
