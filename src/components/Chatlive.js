@@ -99,7 +99,7 @@ const Chatlive = (props) => {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [pickerVisible, setPickerVisible] = React.useState(false);
     const [incomming, setIncomming] = React.useState(false);// change default to null
-    const [isFirstTime] = props;
+    const {isFirstTime} = props;
 
     // check cookie if the visitor has been to this site if so send token
     React.useEffect(() => {
