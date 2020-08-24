@@ -29,8 +29,8 @@ const Chatwindow = (props) => {
             isFirstTime={props.firstTime} 
             chatMessages={props.chatMessages} 
             setChatMessages={props.setChatMessages}
-            // assignedAgentName={props.assignedAgentName}
-            // setAssignedAgentName={props.setAssignedAgentName}
+            assignedAgentName={props.assignedAgentName}
+            setAssignedAgentName={props.setAssignedAgentName}
             // avatarURL={props.avatarURL}
             // setAvatarURL={props.setAvatarURL}
             /> : <Card className={classes.root}>
