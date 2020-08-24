@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
 
   chat_window: {
     position: 'absolute',
-    top: theme.spacing(1),
+    bottom: '80px',
     right: theme.spacing(5),
     width: "28%",
     visibility: 'hidden'
@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
 
   chat_window_visible: {
     position: 'absolute',
-    top: theme.spacing(1),
+    bottom: '80px',
     right: theme.spacing(5),
     width: "28%"
   },
