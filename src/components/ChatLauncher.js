@@ -32,8 +32,8 @@ const ChatLauncher = () => {
   const [launcheropen, setLauncher] = React.useState(false)
   const [firstTime, setFirstTime] = React.useState(true);
   const [chatMessages, setChatMessages] = React.useState([]);
-  const [assignedAgentName, setAssignedAgentName] = React.useState("");
-  const [avatarURL, setAvatarURL] = React.useState("");
+  // const [assignedAgentName, setAssignedAgentName] = React.useState("");
+  // const [avatarURL, setAvatarURL] = React.useState("");
 
   const handleFirstTime = () => {
     setFirstTime(false);
@@ -51,10 +51,10 @@ const ChatLauncher = () => {
           handleFirstTime={handleFirstTime}
           chatMessages={chatMessages}
           setChatMessages={setChatMessages}
-          assignedAgentName={assignedAgentName}
-          setAssignedAgentName={setAssignedAgentName}
-          avatarURL={avatarURL}
-          setAvatarURL={setAvatarURL}
+          // assignedAgentName={assignedAgentName}
+          // setAssignedAgentName={setAssignedAgentName}
+          // avatarURL={avatarURL}
+          // setAvatarURL={setAvatarURL}
           />}
       </div>
       <Fab color="primary" aria-label="add" className={classes.fab} onClick={handleClick}>

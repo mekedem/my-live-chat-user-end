@@ -99,6 +99,7 @@ const Chatlive = (props) => {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [pickerVisible, setPickerVisible] = React.useState(false);
     const [incomming, setIncomming] = React.useState(false);// change default to null
+    const [isFirstTime] = props;
 
     // check cookie if the visitor has been to this site if so send token
     React.useEffect(() => {
@@ -110,12 +111,12 @@ const Chatlive = (props) => {
             alert(error);
           }
         });
-      }, [ENDPOINT, props.isFirstTime]);
+      }, [ENDPOINT, isFirstTime]);
 
     React.useEffect(() => {
         socket.on(AGENTASSIGNED, ({ name, avatarURL }) => {
-          props.setAssignedAgentName(name);
-          props.setAvatarURL(avatarURL);
+        //   props.setAssignedAgentName(name);
+        //   props.setAvatarURL(avatarURL);
         //   console.log("agent assigned console.log");
         });
         
@@ -212,7 +213,8 @@ const Chatlive = (props) => {
         <Card className={classes.root}>
             <CardHeader className={classes.chatheaders}
                 avatar={
-                    <Avatar src={props.avatarURL}></Avatar>
+                    <Avatar ></Avatar>
+                    // src={props.avatarURL}
                 }
                 action={
                     <CardActions>
@@ -245,13 +247,16 @@ const Chatlive = (props) => {
                         </Menu>
                     </CardActions>
                 }
-                title={props.assignedAgentName}
+                title="somebody"
+                // props.assignedAgentName
                 subheader="time"
             />
             <Scrollbars style={{ width: "100%", height: "100%" }}>
                 <CardContent className={classes.chatbody}>
                     {props.chatMessages.map((msgitem) => {
-                         return <Typography variant="body2" color="textSecondary" component="p" className={incomming ? classes.chatreceiver : classes.chatmessage}>
+                         return incomming ? <Typography variant="body2" color="textSecondary" component="p" className={classes.chatreceiver}>
+                         {msgitem.body} </Typography> :
+                         <Typography variant="body2" color="textSecondary" component="p" className={classes.chatmessage}>
                          {msgitem.body} </Typography>
                     })}
                 </CardContent>
