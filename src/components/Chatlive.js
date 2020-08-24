@@ -98,9 +98,7 @@ const Chatlive = (props) => {
     const [input, setInput] = React.useState("");
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [pickerVisible, setPickerVisible] = React.useState(false);
-    const [incomming, setIncomming] = React.useState(false);// change default to null
-    const [isFirstTime] = props;
-
+    const {isFirstTime, chatMessages, setChatMessages} = props;
     // check cookie if the visitor has been to this site if so send token
     React.useEffect(() => {
         const token = getCookie('conversationToken');
@@ -121,8 +119,9 @@ const Chatlive = (props) => {
         });
         
         socket.on(MESSAGE, ({ body, time }) => {
-            props.setChatMessages(chatMessages => [ ...chatMessages, {body,time} ]);
-            setIncomming(true);
+            const incomming = {incomming : true};
+            setChatMessages(chatMessages => [ ...chatMessages, {body,time,incomming} ]);
+            // setIncomming(true);
             // console.log("this is the body of the message received", body);
             // also display the time with the message in object form 
         });
@@ -170,10 +169,10 @@ const Chatlive = (props) => {
     const sendMessage = (e) => {
         e.preventDefault();
         if(input) {
-            const msg = { body: input, time: Date.now() };
+            const msg = { body: input, time: Date.now(), incomming: false};
             socket.emit(MESSAGE, msg);
-            props.setChatMessages(chatMessages => [ ...chatMessages, msg ]); // push msg later on
-            setIncomming(false);
+            setChatMessages(chatMessages => [ ...chatMessages, msg ]); // push msg later on
+            // setIncomming(false);
         }
         // console.log(props.userEmail); the visitors email he enters at the beginning
         setInput("");
@@ -252,12 +251,10 @@ const Chatlive = (props) => {
                 subheader="time"
             />
             <Scrollbars style={{ width: "100%", height: "100%" }}>
-                <CardContent className={classes.chatbody}>
-                    {props.chatMessages.map((msgitem) => {
-                         return incomming ? <Typography variant="body2" color="textSecondary" component="p" className={classes.chatreceiver}>
-                         {msgitem.body} </Typography> :
-                         <Typography variant="body2" color="textSecondary" component="p" className={classes.chatmessage}>
-                         {msgitem.body} </Typography>
+                 <CardContent className={classes.chatbody}>
+                    {chatMessages.map((msgitem) => {                
+                    return <Typography variant="body2" color="textSecondary" component="p" className={msgitem.incomming ? classes.chatreceiver : classes.chatmessage}>
+                         {msgitem.body} </Typography>      
                     })}
                 </CardContent>
             </Scrollbars>
