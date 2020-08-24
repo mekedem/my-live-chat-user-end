@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     chatbody: {
         flex: 1
     },
-    chatmessage: {
+    chatreceiver: {
         position: "relative",
         fontSize: "16px",
         backgroundColor: "#EAF0F6",
@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
         marginBottom: "30px"
     },
 
-    chatreceiver: {
+    chatmessage: {
         position: "relative",
         fontSize: "16px",
         padding: "10px",
@@ -98,9 +98,6 @@ const Chatlive = (props) => {
     const [input, setInput] = React.useState("");
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [pickerVisible, setPickerVisible] = React.useState(false);
-    const [assignedAgentName, setAssignedAgentName] = React.useState("");
-    const [avatarURL, setAvatarURL] = React.useState("");
-    const [chatMessages, setChatMessages] = React.useState([]);
     const [incomming, setIncomming] = React.useState(false);// change default to null
 
     // check cookie if the visitor has been to this site if so send token
@@ -117,13 +114,13 @@ const Chatlive = (props) => {
 
     React.useEffect(() => {
         socket.on(AGENTASSIGNED, ({ name, avatarURL }) => {
-          setAssignedAgentName(name);
-          setAvatarURL(avatarURL);
+          props.setAssignedAgentName(name);
+          props.setAvatarURL(avatarURL);
         //   console.log("agent assigned console.log");
         });
         
         socket.on(MESSAGE, ({ body, time }) => {
-            setChatMessages(chatMessages => [ ...chatMessages, {body,time} ]);
+            props.setChatMessages(chatMessages => [ ...chatMessages, {body,time} ]);
             setIncomming(true);
             // console.log("this is the body of the message received", body);
             // also display the time with the message in object form 
@@ -174,7 +171,7 @@ const Chatlive = (props) => {
         if(input) {
             const msg = { body: input, time: Date.now() };
             socket.emit(MESSAGE, msg);
-            setChatMessages(chatMessages => [ ...chatMessages, msg ]); // push msg later on
+            props.setChatMessages(chatMessages => [ ...chatMessages, msg ]); // push msg later on
             setIncomming(false);
         }
         // console.log(props.userEmail); the visitors email he enters at the beginning
@@ -215,7 +212,7 @@ const Chatlive = (props) => {
         <Card className={classes.root}>
             <CardHeader className={classes.chatheaders}
                 avatar={
-                    <Avatar src={avatarURL}></Avatar>
+                    <Avatar src={props.avatarURL}></Avatar>
                 }
                 action={
                     <CardActions>
@@ -248,13 +245,13 @@ const Chatlive = (props) => {
                         </Menu>
                     </CardActions>
                 }
-                title={assignedAgentName}
+                title={props.assignedAgentName}
                 subheader="time"
             />
             <Scrollbars style={{ width: "100%", height: "100%" }}>
                 <CardContent className={classes.chatbody}>
-                    {chatMessages.map((msgitem) => {
-                         return <Typography variant="body2" color="textSecondary" component="p" className={incomming ? classes.chatmessage : classes.chatreceiver}>
+                    {props.chatMessages.map((msgitem) => {
+                         return <Typography variant="body2" color="textSecondary" component="p" className={incomming ? classes.chatreceiver : classes.chatmessage}>
                          {msgitem.body} </Typography>
                     })}
                 </CardContent>

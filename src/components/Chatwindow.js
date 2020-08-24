@@ -25,7 +25,15 @@ const Chatwindow = (props) => {
   }
 
   return (
-    !props.firstTime ? <Chatlive userEmail={userEmail} isFirstTime={props.firstTime}/> : <Card className={classes.root}>
+    !props.firstTime ? <Chatlive userEmail={userEmail} 
+            isFirstTime={props.firstTime} 
+            chatMessages={props.chatMessages} 
+            setChatMessages={props.setChatMessages}
+            assignedAgentName={props.assignedAgentName}
+            setAssignedAgentName={props.setAssignedAgentName}
+            avatarURL={props.avatarURL}
+            setAvatarURL={props.setAvatarURL}
+            /> : <Card className={classes.root}>
       <CardContent>
         <Register handleFirstTime={props.handleFirstTime} passEmail={passEmail}/>
       </CardContent>

@@ -11,14 +11,14 @@ const useStyles = makeStyles((theme) => ({
       margin: theme.spacing(1),
     },
   },
-  
+
   chat_window: {
     position: 'absolute',
     top: theme.spacing(1),
     right: theme.spacing(5),
     width: "28%"
   },
-  
+
   fab: {
     position: 'absolute',
     bottom: theme.spacing(1),
@@ -31,6 +31,9 @@ const ChatLauncher = () => {
   const classes = useStyles();
   const [launcheropen, setLauncher] = React.useState(false)
   const [firstTime, setFirstTime] = React.useState(true);
+  const [chatMessages, setChatMessages] = React.useState([]);
+  const [assignedAgentName, setAssignedAgentName] = React.useState("");
+  const [avatarURL, setAvatarURL] = React.useState("");
 
   const handleFirstTime = () => {
     setFirstTime(false);
@@ -43,11 +46,20 @@ const ChatLauncher = () => {
   return (
     <div className={classes.root}>
       <div className={classes.chat_window}>
-      {launcheropen && <Chatwindow firstTime={firstTime} handleFirstTime={handleFirstTime}/>}
+        {launcheropen && <Chatwindow
+          firstTime={firstTime}
+          handleFirstTime={handleFirstTime}
+          chatMessages={chatMessages}
+          setChatMessages={setChatMessages}
+          assignedAgentName={assignedAgentName}
+          setAssignedAgentName={setAssignedAgentName}
+          avatarURL={avatarURL}
+          setAvatarURL={setAvatarURL}
+          />}
       </div>
       <Fab color="primary" aria-label="add" className={classes.fab} onClick={handleClick}>
-       {!launcheropen && <ChatBubbleRoundedIcon />}
-       {launcheropen && <CloseRoundedIcon/>}
+        {!launcheropen && <ChatBubbleRoundedIcon />}
+        {launcheropen && <CloseRoundedIcon />}
       </Fab>
     </div>
   );
