@@ -12,6 +12,7 @@ import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import { ListItemIcon } from '@material-ui/core';
 import NotificationsActiveIcon from '@material-ui/icons/NotificationsActive';
+import NotificationsOffIcon from '@material-ui/icons/NotificationsOff';
 import StarBorderIcon from '@material-ui/icons/StarBorder';
 import { Scrollbars } from 'react-custom-scrollbars';
 import Menu from '@material-ui/core/Menu';
@@ -46,7 +47,6 @@ const useStyles = makeStyles((theme) => ({
         width: "fit-content",
         marginBottom: "30px"
     },
-
     chatmessage: {
         position: "relative",
         fontSize: "16px",
@@ -58,19 +58,24 @@ const useStyles = makeStyles((theme) => ({
         marginLeft: "auto",
         backgroundColor: "#33475b"
     },
-
+    emojipicker: {
+        position: 'absolute',
+        bottom: theme.spacing(7),
+        right: theme.spacing(2.2)
+    },
     chatfooter: {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         height: "62px",
     },
-
+    emojiicon: {
+        padding: "15px"
+    },
     chatfooterform: {
         flex: 1,
         display: "flex"
     },
-
     chatinput: {
         flex: 1,
         padding: "10px",
@@ -78,14 +83,6 @@ const useStyles = makeStyles((theme) => ({
     },
     chatsend: {
         display: "none"
-    },
-    emojiicon: {
-        padding: "15px"
-    },
-    emojipicker: {
-        position: 'absolute',
-        bottom: theme.spacing(7),
-        right: theme.spacing(2.2)
     }
 }));
 
@@ -93,28 +90,25 @@ let socket;
 let visitorQuery = { usertype: 'visitor', agency: 'telegram' };
 
 const Chatlive = (props) => {
+    
     const ENDPOINT = 'http://localhost:5000';
     const classes = useStyles();
     const [input, setInput] = React.useState("");
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [pickerVisible, setPickerVisible] = React.useState(false);
-    const {isFirstTime, chatMessages, setChatMessages, assignedAgentName, setAssignedAgentName} = props;
+    const {isFirstTime, chatMessages, setChatMessages, assignedAgentName, setAssignedAgentName, setNotificationCount, notifyme, setNotifyme} = props;
     const [ioconnected, setioconnected] = React.useState(false);
     const scrollbars = React.useRef(null);
-    // check cookie if the visitor has been to this site if so send token
+
+    // need to send token from cookie
     React.useEffect(() => {
         const token = getCookie('conversationToken');
-        // console.log("the first time loading the token is : ", token);
         socket = io(ENDPOINT, { query: { ...visitorQuery, token }, forceNew: true });
         socket.emit(GETANAGENT,{}, (error) => {
           if(error) {
             alert(error);
             setioconnected(false);
           }
-        //   console.log("here emitted");
-        //   else{
-        //       setioconnected(true);
-        //   }
         });
       }, [ENDPOINT, isFirstTime]);
 
@@ -122,15 +116,13 @@ const Chatlive = (props) => {
         socket.on(AGENTASSIGNED, ({ name, avatarURL }) => {
         setAssignedAgentName(name);
         //   props.setAvatarURL(avatarURL);
-        //   console.log("agent assigned console.log");
         });
         
         socket.on(MESSAGE, ({ body, time }) => {
             const incomming = {incomming : true};
             setChatMessages(chatMessages => [ ...chatMessages, {body,time,incomming} ]);
             scrollbars.current.scrollToBottom();
-            // console.log("this is the body of the message received", body);
-            // also display the time with the message in object form 
+            setNotificationCount(notificationCount => notificationCount + 1);        
         });
 
         socket.on(OFFLINE, () => {
@@ -180,13 +172,12 @@ const Chatlive = (props) => {
             const msg = { body: input, time: Date.now(), incomming: false};
             socket.emit(MESSAGE, msg);
             setChatMessages(chatMessages => [ ...chatMessages, msg ]); // push msg later on
-            scrollbars.current.scrollToBottom()
+            scrollbars.current.scrollToBottom();
             setInput("");
             setPickerVisible(false);
         }
         // console.log("no connection or empty message")
-        // console.log(props.userEmail); the visitors email he enters at the beginning
-        
+        // console.log(props.userEmail); the visitors email he enters at the beginning     
     }
 
     // toggle emoji picker visibility
@@ -216,11 +207,13 @@ const Chatlive = (props) => {
     // to close the emoji picker
     const closeEP = () => {
         setPickerVisible(false);
+        setAnchorEl(null);
     }
 
-    // const handleScrollUpdate = (scrollBar) => {
-    //     scrollBar.scrollToBottom();
-    //  }
+    const handleNotification = () => {
+        setNotifyme(!notifyme);
+        setAnchorEl(null);
+    }
 
     return (
         <Card className={classes.root}>
@@ -248,11 +241,11 @@ const Chatlive = (props) => {
                                 vertical: 'top',
                                 horizontal: 'right',
                             }}>
-                            <MenuItem onClick={handleClose}>
+                            <MenuItem onClick={handleNotification}>
                                 <ListItemIcon>
-                                    <NotificationsActiveIcon fontSize="small" />
+                                 {notifyme ? <NotificationsActiveIcon fontSize="small"/> : <NotificationsOffIcon fontSize="small"/>}
                                 </ListItemIcon>
-                                <Typography variant="inherit">Turn on notifications</Typography></MenuItem>
+                        {notifyme ? <Typography variant="inherit">Turn off notifications</Typography> : <Typography variant="inherit">Turn on notifications</Typography>}</MenuItem>
                             <MenuItem onClick={handleClose}><ListItemIcon>
                                 <StarBorderIcon fontSize="small" />
                             </ListItemIcon>
@@ -266,7 +259,7 @@ const Chatlive = (props) => {
             <Scrollbars ref={scrollbars} style={{ width: "100%", height: "100%" }}>
                  <CardContent className={classes.chatbody}>
                     {chatMessages.map((msgitem) => {                
-                    return <Typography variant="body2" color="textSecondary" component="p" className={msgitem.incomming ? classes.chatreceiver : classes.chatmessage}>
+                    return <Typography variant="body2" color="textSecondary" key={chatMessages.indexOf(msgitem)} component="p" className={msgitem.incomming ? classes.chatreceiver : classes.chatmessage}>
                          {msgitem.body} </Typography>      
                     })}
                 </CardContent>

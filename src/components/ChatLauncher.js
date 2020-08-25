@@ -4,6 +4,7 @@ import Chatwindow from './Chatwindow';
 import Fab from '@material-ui/core/Fab';
 import ChatBubbleRoundedIcon from '@material-ui/icons/ChatBubbleRounded';
 import CloseRoundedIcon from '@material-ui/icons/CloseRounded';
+import Badge from '@material-ui/core/Badge';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -41,6 +42,8 @@ const ChatLauncher = () => {
   const [firstTime, setFirstTime] = React.useState(true);
   const [chatMessages, setChatMessages] = React.useState([]);
   const [assignedAgentName, setAssignedAgentName] = React.useState("");
+  const [notificationCount, setNotificationCount] = React.useState(0);
+  const [notifyme, setNotifyme] = React.useState(true);
   // const [avatarURL, setAvatarURL] = React.useState("");
 
   const handleFirstTime = () => {
@@ -49,8 +52,9 @@ const ChatLauncher = () => {
 
   const handleClick = () => {
     setLauncher(!launcheropen);
+    if (launcheropen) setNotificationCount(0);
   }
-
+  
   return (
     <div className={classes.root}>
       <div className={launcheropen ? classes.chat_window_visible : classes.chat_window}>
@@ -61,12 +65,17 @@ const ChatLauncher = () => {
           setChatMessages={setChatMessages}
           assignedAgentName={assignedAgentName}
           setAssignedAgentName={setAssignedAgentName}
+          notificationCount={notificationCount}
+          setNotificationCount={setNotificationCount}
+          notifyme={notifyme}
+          setNotifyme={setNotifyme}
           // avatarURL={avatarURL}
           // setAvatarURL={setAvatarURL}
           />
       </div>
       <Fab color="primary" aria-label="add" className={classes.fab} onClick={handleClick}>
-        {!launcheropen && <ChatBubbleRoundedIcon />}
+        {!launcheropen && !notifyme && <ChatBubbleRoundedIcon />}
+        {!launcheropen && notifyme && <Badge color="secondary" badgeContent={notificationCount}><ChatBubbleRoundedIcon /></Badge>}
         {launcheropen && <CloseRoundedIcon />}
       </Fab>
     </div>
