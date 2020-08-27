@@ -46,6 +46,13 @@ const ChatLauncher = () => {
   const [notifyme, setNotifyme] = React.useState(true);
   // const [avatarURL, setAvatarURL] = React.useState("");
 
+  React.useEffect(() => {
+    const notificationstate = JSON.parse(localStorage.getItem('notificationstate'));
+    if(notificationstate != null){
+      setNotifyme(notificationstate);
+    }
+  }, [notifyme]);
+
   const handleFirstTime = () => {
     setFirstTime(false);
   }
