@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: "#EAF0F6",
         padding: "10px",
         color: "#33475b",
-        borderRadius: "10px",
+        borderRadius:"10px 10px 10px 0px",
         width: "fit-content",
         marginBottom: "30px"
     },
@@ -55,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
         fontSize: "16px",
         padding: "10px",
         color: "#ffffff",
-        borderRadius: "10px",
+        borderRadius:"10px 10px 0px 10px",
         width: "fit-content",
         marginBottom: "30px",
         marginLeft: "auto",
