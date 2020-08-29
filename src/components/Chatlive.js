@@ -21,6 +21,7 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import EmojiPicker from 'emoji-picker-react';
 import '../custom_EmojiPicker.css';
+import axios from 'axios';
 import io from "socket.io-client";
 import {AGENTLEFT, AGENTASSIGNED, OFFLINE, TOKEN, MESSAGE, STARTCONVERSATION} from '../Events.js';
 import { yellow } from '@material-ui/core/colors';
@@ -49,7 +50,8 @@ const useStyles = makeStyles((theme) => ({
         color: "#33475b",
         borderRadius:"10px 10px 10px 0px",
         width: "fit-content",
-        marginBottom: "30px"
+        marginBottom: "30px",
+        maxWidth: "95%"
     },
     chatmessage: {
         position: "relative",
@@ -60,7 +62,8 @@ const useStyles = makeStyles((theme) => ({
         width: "fit-content",
         marginBottom: "30px",
         marginLeft: "auto",
-        backgroundColor: "#33475b"
+        backgroundColor: "#33475b",
+        maxWidth: "95%"
     },
     emojipicker: {
         position: 'absolute',
@@ -116,6 +119,7 @@ const useStyles = makeStyles((theme) => ({
 
 let socket;
 let visitorQuery = { usertype: 'visitor', agency: 'telegram' };
+const api = axios.create({baseURL:'http://localhost:5000/visitor/'});
 
 const Chatlive = (props) => {
     
@@ -129,10 +133,38 @@ const Chatlive = (props) => {
     const [goodMessage, setGoodMessage] = React.useState(true);
     const [commentbox, setCommentBox] = React.useState(false);
     const [inputComment, setInputComment] = React.useState("");
+    const [offline, setOffline] = React.useState("");
     const [commentDisable, setCommentDisable] = React.useState(false);
     const scrollbars = React.useRef(null);
 
-    // need to send token from cookie
+    React.useEffect(() => {
+        const token = localStorage.getItem('conversationToken');
+        if (token) {
+            console.log(token);
+            api.get('/history', {
+                params: {
+                    fetchedHistoryCount: "2",
+                    conversationID: token
+                }
+            }).then(res => {
+                if (res.data.success) {
+                    const temp = res.data.data.history;
+                    for (let j = 0; j < temp.length; j++) {
+                        if (temp[j].sender.agent) {
+                            const msga = { text: temp[j].text, sender: temp[j].sender, incomming: true };
+                            setChatMessages(chatMessages => [...chatMessages, { msg: msga }]);
+                        }
+                        else if (temp[j].sender.visitor) {
+                            const msgv = { text: temp[j].text, sender: temp[j].sender, incomming: false };
+                            setChatMessages(chatMessages => [...chatMessages, { msg: msgv }]);
+                        }
+                    }
+                    scrollbars.current.scrollToBottom();
+                }
+            })
+        }
+    }, []);
+
     React.useEffect(() => {
         const token = localStorage.getItem('conversationToken');
         const browserID = localStorage.getItem('browserID').toString();
@@ -156,6 +188,7 @@ const Chatlive = (props) => {
     React.useEffect(() => {
         socket.on(AGENTASSIGNED, ({name, avatarURL}) => {
             setAssignedAgentName(name);
+            setOffline("");
         //  setAvatarURL(avatarURL);
         });
         
@@ -177,7 +210,7 @@ const Chatlive = (props) => {
         });
 
         socket.on(OFFLINE, () => {
-            // console.log("all agents are offline so nothing is coming");
+            setOffline("we are offline now we'll be back");
         });
 
         socket.on(AGENTLEFT, () => {
@@ -318,13 +351,15 @@ const Chatlive = (props) => {
                         </Menu>
                     </CardActions>
                 }
+                titleTypographyProps={{variant:'h6' }}
                 title={assignedAgentName}
-                // subheader="time"
+                subheaderTypographyProps={{color:'inherit'}}
+                subheader={offline}
             />
             <Scrollbars ref={scrollbars} style={{ width: "100%", height: "100%" }} key="thescrollbar">
                  <CardContent className={classes.chatbody}>
-                    {chatMessages.map((msgitem) => {                
-                    return msgitem.rating ? <Paper className={classes.paper}>
+                    {chatMessages.map((msgitem, idx) => {                
+                    return msgitem.rating ? <Paper className={classes.paper} key={idx}>
                         <Paper>
                     <MenuList>
                       <Typography className={classes.ratingheader} >Did you find this conversation helpful?</Typography>
@@ -339,7 +374,7 @@ const Chatlive = (props) => {
                         <input type="text" disabled={commentDisable} placeholder=" Type your comment here... " value={inputComment} onKeyPress={commentEntered} onChange={(e)=>{setInputComment(e.target.value)}} className={classes.ratecommentinput}/>
                     </MenuList>}
                     </Paper>
-                  </Paper> : <Typography variant="body2" color="textSecondary" key={chatMessages.indexOf(msgitem.msg)} component="p" className={msgitem.msg.incomming ? classes.chatreceiver : classes.chatmessage}>
+                  </Paper> : <Typography variant="body2" color="textSecondary" key={idx} component="p" className={msgitem.msg.incomming ? classes.chatreceiver : classes.chatmessage}>
                          {msgitem.msg.text} </Typography>
                     })}
                 </CardContent>

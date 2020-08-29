@@ -41,7 +41,7 @@ const ChatLauncher = () => {
   const [launcheropen, setLauncher] = React.useState(false)
   const [firstTime, setFirstTime] = React.useState(true);
   const [chatMessages, setChatMessages] = React.useState([]);
-  const [assignedAgentName, setAssignedAgentName] = React.useState("");
+  const [assignedAgentName, setAssignedAgentName] = React.useState("Chat with us!");
   const [notificationCount, setNotificationCount] = React.useState(0);
   const [notifyme, setNotifyme] = React.useState(true);
   // const [avatarURL, setAvatarURL] = React.useState("");
