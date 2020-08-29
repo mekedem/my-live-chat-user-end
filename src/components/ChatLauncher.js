@@ -51,6 +51,12 @@ const ChatLauncher = () => {
     if(notificationstate != null){
       setNotifyme(notificationstate);
     }
+    if(localStorage.getItem('browserID') == null){
+      localStorage.setItem('browserID',Math.random());
+    }
+    if(localStorage.getItem('conversationToken') != null){
+      handleFirstTime(); 
+    }
   }, [notifyme]);
 
   const handleFirstTime = () => {

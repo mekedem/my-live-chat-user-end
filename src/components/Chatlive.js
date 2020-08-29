@@ -20,10 +20,11 @@ import MenuList from '@material-ui/core/MenuList';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import EmojiPicker from 'emoji-picker-react';
-import './custom_EmojiPicker.css';
+import '../custom_EmojiPicker.css';
 import io from "socket.io-client";
-import {GETANAGENT, AGENTASSIGNED, OFFLINE, TOKEN, MESSAGE} from '../Events.js';
+import {AGENTLEFT, AGENTASSIGNED, OFFLINE, TOKEN, MESSAGE, STARTCONVERSATION} from '../Events.js';
 import { yellow } from '@material-ui/core/colors';
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -64,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
     emojipicker: {
         position: 'absolute',
         bottom: theme.spacing(7),
-        right: theme.spacing(2.2)
+        right: theme.spacing(5)
     },
     chatfooter: {
         display: "flex",
@@ -112,6 +113,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+
 let socket;
 let visitorQuery = { usertype: 'visitor', agency: 'telegram' };
 
@@ -122,7 +124,7 @@ const Chatlive = (props) => {
     const [input, setInput] = React.useState("");
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [pickerVisible, setPickerVisible] = React.useState(false);
-    const {isFirstTime, chatMessages, setChatMessages, assignedAgentName, setAssignedAgentName, setNotificationCount, notifyme, setNotifyme} = props;
+    const {isFirstTime, chatMessages, setChatMessages, assignedAgentName, setAssignedAgentName, setNotificationCount, notifyme, setNotifyme, userEmail} = props;
     const [ioconnected, setioconnected] = React.useState(false);
     const [goodMessage, setGoodMessage] = React.useState(true);
     const [commentbox, setCommentBox] = React.useState(false);
@@ -132,35 +134,59 @@ const Chatlive = (props) => {
 
     // need to send token from cookie
     React.useEffect(() => {
-        const token = getCookie('conversationToken');
-        socket = io(ENDPOINT, { query: { ...visitorQuery, token }, forceNew: true });
-        socket.emit(GETANAGENT,{}, (error) => {
-          if(error) {
-            alert(error);
-            setioconnected(false);
-          }
-        });
+        const token = localStorage.getItem('conversationToken');
+        const browserID = localStorage.getItem('browserID').toString();
+        const email = userEmail;
+        if(token == null){
+            socket = io(ENDPOINT, { query: { ...visitorQuery, token:"", browserID }});
+            console.log("token altemezegebem ");
+            socket.emit(STARTCONVERSATION,{email}, (error) => {
+                if(error) {
+                    alert(error);
+                    setioconnected(false);
+                }
+            });
+        }
+        else{
+            socket = io(ENDPOINT, { query: { ...visitorQuery, token, browserID }});
+        }
+
       }, [ENDPOINT, isFirstTime]);
 
     React.useEffect(() => {
-        socket.on(AGENTASSIGNED, ({ name, avatarURL }) => {
-        setAssignedAgentName(name);
-        //   props.setAvatarURL(avatarURL);
+        socket.on(AGENTASSIGNED, ({name, avatarURL}) => {
+            setAssignedAgentName(name);
+        //  setAvatarURL(avatarURL);
         });
         
-        socket.on(MESSAGE, ({ body, time }) => {
-            const incomming = {incomming : true};
-            setChatMessages(chatMessages => [ ...chatMessages, {body,time,incomming} ]);
-            scrollbars.current.scrollToBottom();
-            setNotificationCount(notificationCount => notificationCount + 1);        
+        socket.on(MESSAGE, (msg) => {
+            if(msg.sender){
+                if(msg.sender.agent){
+                    const msga = { text: msg.text, sender: msg.sender, incomming:true};
+                    setChatMessages(chatMessages => [ ...chatMessages, {msg:msga}]);
+                    setNotificationCount(notificationCount => notificationCount + 1);
+                }
+                else if(msg.sender.visitor){
+                    const msgv = { text: msg.text, sender: msg.sender, incomming:false};
+                    setChatMessages(chatMessages => [ ...chatMessages, {msg:msgv}]);
+                }
+                scrollbars.current.scrollToBottom();
+            }
+            // console.log(conversationID);
+            // console.log(createdAt.time);        
         });
 
         socket.on(OFFLINE, () => {
             // console.log("all agents are offline so nothing is coming");
         });
 
+        socket.on(AGENTLEFT, () => {
+            setAssignedAgentName("");
+            // setAvatarURL("")
+        });
+
         socket.on(TOKEN, ({ token }) => {
-            setCookie('conversationToken', token, 365);
+            localStorage.setItem('conversationToken', token);
         });
 
         socket.on('connect', () => {
@@ -173,42 +199,17 @@ const Chatlive = (props) => {
         })
     }, []);
 
-    // reconsider this on production
-    const setCookie = (cname, cvalue, exdays) => {
-        var d = new Date();
-        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-        var expires = "expires=" + d.toUTCString();
-        document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
-    }
-
-    const getCookie = (cname) => {
-        var name = cname + "=";
-        var decodedCookie = decodeURIComponent(document.cookie);
-        var ca = decodedCookie.split(';');
-        for (var i = 0; i < ca.length; i++) {
-            var c = ca[i];
-            while (c.charAt(0) === ' ') {
-                c = c.substring(1);
-            }
-            if (c.indexOf(name) === 0) {
-                return c.substring(name.length, c.length);
-            }
-        }
-        return "";
-    }
-
     const sendMessage = (e) => {
         e.preventDefault();
         if(input && ioconnected) {
-            const msg = { body: input, time: Date.now(), incomming: false};
+            const msg = { text: input, sender: [{visitor:true}]};
+            const msgv = { text: input, sender: [{visitor:true}], incomming:false};
+            setChatMessages(chatMessages => [ ...chatMessages, {msg:msgv}]);
             socket.emit(MESSAGE, msg);
-            setChatMessages(chatMessages => [ ...chatMessages, msg ]); // push msg later on
             scrollbars.current.scrollToBottom();
             setInput("");
             setPickerVisible(false);
-        }
-        // console.log("no connection or empty message")
-        // console.log(props.userEmail); the visitors email he enters at the beginning     
+        }     
     }
 
     // toggle emoji picker visibility
@@ -230,13 +231,13 @@ const Chatlive = (props) => {
         setAnchorEl(event.currentTarget);
     };
 
+    // options icon on close header of the chat window
     const handleClose = () => {
         setAnchorEl(null);
     }
 
-    // options icon on close header of the chat window
     const handleRating = () => {
-        // if previously attempted then remove
+        // if previously attempted to rate then remove that first
         setInputComment("");
         setCommentDisable(false);
         const lst = [...chatMessages];
@@ -320,7 +321,7 @@ const Chatlive = (props) => {
                 title={assignedAgentName}
                 // subheader="time"
             />
-            <Scrollbars ref={scrollbars} style={{ width: "100%", height: "100%" }}>
+            <Scrollbars ref={scrollbars} style={{ width: "100%", height: "100%" }} key="thescrollbar">
                  <CardContent className={classes.chatbody}>
                     {chatMessages.map((msgitem) => {                
                     return msgitem.rating ? <Paper className={classes.paper}>
@@ -338,8 +339,8 @@ const Chatlive = (props) => {
                         <input type="text" disabled={commentDisable} placeholder=" Type your comment here... " value={inputComment} onKeyPress={commentEntered} onChange={(e)=>{setInputComment(e.target.value)}} className={classes.ratecommentinput}/>
                     </MenuList>}
                     </Paper>
-                  </Paper> : <Typography variant="body2" color="textSecondary" key={chatMessages.indexOf(msgitem)} component="p" className={msgitem.incomming ? classes.chatreceiver : classes.chatmessage}>
-                         {msgitem.body} </Typography>
+                  </Paper> : <Typography variant="body2" color="textSecondary" key={chatMessages.indexOf(msgitem.msg)} component="p" className={msgitem.msg.incomming ? classes.chatreceiver : classes.chatmessage}>
+                         {msgitem.msg.text} </Typography>
                     })}
                 </CardContent>
             </Scrollbars>
