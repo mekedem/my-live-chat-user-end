@@ -5,5 +5,7 @@ module.exports = {
     OFFLINE: 'OFFLINE',
     STARTCONVERSATION: 'STARTCONVERSATION',
     AGENTLEFT: 'AGENTLEFT',
-    LEAVECHAT: 'LEAVECHAT'
+    LEAVECHAT: 'LEAVECHAT',
+    CONNECT: 'connect',
+    ERROR: 'error'
 };

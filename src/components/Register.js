@@ -51,8 +51,7 @@ export default function Register(props) {
   const startChat = (e) => {
     e.preventDefault();
     if(validateEmail(userEmail) && checked){
-      props.passEmail(userEmail);
-      props.handleFirstTime();
+      props.handleStartConversation(userEmail);
     }
   }
 

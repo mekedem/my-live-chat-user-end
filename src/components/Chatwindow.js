@@ -16,31 +16,25 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Chatwindow = (props) => {
-
-  const [userEmail, setUserEmail] = React.useState('');
   const classes = useStyles();
-
-  const passEmail = (email) => {
-    setUserEmail(email);
-  }
+  const {firstTime, chatMessages, setChatMessages, assignedAgentName, setAssignedAgentName, notifyme, setNotifyme, handleEmittedMessage, handleStartConversation, offline, ioconnected} = props;
 
   return (
-    !props.firstTime ? <Chatlive userEmail={userEmail} 
-            isFirstTime={props.firstTime} 
-            chatMessages={props.chatMessages} 
-            setChatMessages={props.setChatMessages}
-            assignedAgentName={props.assignedAgentName}
-            setAssignedAgentName={props.setAssignedAgentName}
-            handleNotificationCount={props.handleNotificationCount}
-            notificationCount={props.notificationCount}
-            setNotificationCount={props.setNotificationCount}
-            notifyme={props.notifyme}
-          setNotifyme={props.setNotifyme}
+    !firstTime ? <Chatlive 
+            chatMessages={chatMessages} 
+            setChatMessages={setChatMessages}
+            assignedAgentName={assignedAgentName}
+            setAssignedAgentName={setAssignedAgentName}
+            notifyme={notifyme}
+            setNotifyme={setNotifyme}
+            handleEmittedMessage={handleEmittedMessage}
+            offline={offline}
+            ioconnected={ioconnected}
             // avatarURL={props.avatarURL}
             // setAvatarURL={props.setAvatarURL}
             /> : <Card className={classes.root}>
       <CardContent>
-        <Register handleFirstTime={props.handleFirstTime} passEmail={passEmail}/>
+        <Register handleStartConversation={handleStartConversation}/>
       </CardContent>
     </Card>
   );

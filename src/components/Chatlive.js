@@ -22,8 +22,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 import EmojiPicker from 'emoji-picker-react';
 import '../custom_EmojiPicker.css';
 import axios from 'axios';
-import io from "socket.io-client";
-import {AGENTLEFT, AGENTASSIGNED, OFFLINE, TOKEN, MESSAGE, STARTCONVERSATION} from '../Events.js';
 import { yellow } from '@material-ui/core/colors';
 
 
@@ -38,6 +36,17 @@ const useStyles = makeStyles((theme) => ({
     chatheaders: {
         backgroundColor: "#425B76",
         color: "#ffffff"
+    },
+    moreOptions:{
+        '&:hover': {
+            background: "#425B76",
+            color: "#ffffff"
+         },
+    },
+    notificationicons:{
+        '&:hover': {
+            color: "#ffffff"
+         },
     },
     chatbody: {
         flex: 1
@@ -98,42 +107,36 @@ const useStyles = makeStyles((theme) => ({
         marginBottom:"15px"
     },
     ratingheader:{
-        backgroundColor: "#f0f2f7",
-        color: "#06132B",
+        backgroundColor: "#496583",
+        color: "#ffffff",
         paddingLeft: "5%",
         paddingTop:"2%",
         paddingBottom:"2%"
     },
     ratingreply:{
-        color:"#4d4dff"
+        color:"#425b76"
     },
     ratingcomment:{
         marginTop:"10px",
     },
     ratecommentinput:{
         height:"35px",
-        width:"100%"
+        width:"97%"
     }
 }));
 
-
-let socket;
-let visitorQuery = { usertype: 'visitor', agency: 'telegram' };
 const api = axios.create({baseURL:'http://localhost:5000/visitor/'});
 
 const Chatlive = (props) => {
     
-    const ENDPOINT = 'http://localhost:5000';
     const classes = useStyles();
     const [input, setInput] = React.useState("");
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [pickerVisible, setPickerVisible] = React.useState(false);
-    const {isFirstTime, chatMessages, setChatMessages, assignedAgentName, setAssignedAgentName, setNotificationCount, notifyme, setNotifyme, userEmail} = props;
-    const [ioconnected, setioconnected] = React.useState(false);
+    const {chatMessages, setChatMessages, assignedAgentName, notifyme, setNotifyme, handleEmittedMessage, offline, ioconnected} = props;
     const [goodMessage, setGoodMessage] = React.useState(true);
     const [commentbox, setCommentBox] = React.useState(false);
     const [inputComment, setInputComment] = React.useState("");
-    const [offline, setOffline] = React.useState("");
     const [commentDisable, setCommentDisable] = React.useState(false);
     const scrollbars = React.useRef(null);
 
@@ -165,81 +168,14 @@ const Chatlive = (props) => {
         }
     }, []);
 
-    React.useEffect(() => {
-        const token = localStorage.getItem('conversationToken');
-        const browserID = localStorage.getItem('browserID').toString();
-        const email = userEmail;
-        if(token == null){
-            socket = io(ENDPOINT, { query: { ...visitorQuery, token:"", browserID }});
-            console.log("token altemezegebem ");
-            socket.emit(STARTCONVERSATION,{email}, (error) => {
-                if(error) {
-                    alert(error);
-                    setioconnected(false);
-                }
-            });
-        }
-        else{
-            socket = io(ENDPOINT, { query: { ...visitorQuery, token, browserID }});
-        }
-
-      }, [ENDPOINT, isFirstTime]);
-
-    React.useEffect(() => {
-        socket.on(AGENTASSIGNED, ({name, avatarURL}) => {
-            setAssignedAgentName(name);
-            setOffline("");
-        //  setAvatarURL(avatarURL);
-        });
-        
-        socket.on(MESSAGE, (msg) => {
-            if(msg.sender){
-                if(msg.sender.agent){
-                    const msga = { text: msg.text, sender: msg.sender, incomming:true};
-                    setChatMessages(chatMessages => [ ...chatMessages, {msg:msga}]);
-                    setNotificationCount(notificationCount => notificationCount + 1);
-                }
-                else if(msg.sender.visitor){
-                    const msgv = { text: msg.text, sender: msg.sender, incomming:false};
-                    setChatMessages(chatMessages => [ ...chatMessages, {msg:msgv}]);
-                }
-                scrollbars.current.scrollToBottom();
-            }
-            // console.log(conversationID);
-            // console.log(createdAt.time);        
-        });
-
-        socket.on(OFFLINE, () => {
-            setOffline("we are offline now we'll be back");
-        });
-
-        socket.on(AGENTLEFT, () => {
-            setAssignedAgentName("");
-            // setAvatarURL("")
-        });
-
-        socket.on(TOKEN, ({ token }) => {
-            localStorage.setItem('conversationToken', token);
-        });
-
-        socket.on('connect', () => {
-            setioconnected(true);
-            console.log('socket connected');
-        });
-
-        socket.on('error', (err) => {
-            console.log(err);
-        })
-    }, []);
-
     const sendMessage = (e) => {
         e.preventDefault();
+        scrollbars.current.scrollToBottom();
         if(input && ioconnected) {
             const msg = { text: input, sender: [{visitor:true}]};
             const msgv = { text: input, sender: [{visitor:true}], incomming:false};
             setChatMessages(chatMessages => [ ...chatMessages, {msg:msgv}]);
-            socket.emit(MESSAGE, msg);
-            scrollbars.current.scrollToBottom();
+            handleEmittedMessage(msg);
             setInput("");
             setPickerVisible(false);
         }     
@@ -339,12 +275,12 @@ const Chatlive = (props) => {
                                 vertical: 'top',
                                 horizontal: 'right',
                             }}>
-                            <MenuItem onClick={handleNotification}>
+                            <MenuItem className={classes.moreOptions} onClick={handleNotification}>
                                 <ListItemIcon>
-                                 {notifyme ? <NotificationsActiveIcon fontSize="small"/> : <NotificationsOffIcon fontSize="small"/>}
+                                 {notifyme ? <NotificationsActiveIcon style={{color: "#b3b3b3"}} fontSize="small"/> : <NotificationsOffIcon style={{color: "#b3b3b3"}} fontSize="small"/>}
                                 </ListItemIcon>
-                        {notifyme ? <Typography variant="inherit">Turn off notifications</Typography> : <Typography variant="inherit">Turn on notifications</Typography>}</MenuItem>
-                            <MenuItem onClick={handleRating}><ListItemIcon>
+                        {notifyme ? <Typography variant="inherit">Turn off notifications</Typography> : <Typography  variant="inherit">Turn on notifications</Typography>}</MenuItem>
+                            <MenuItem className={classes.moreOptions} onClick={handleRating}><ListItemIcon>
                                 <StarIcon style={{color: yellow[600]}} fontSize="small" />
                             </ListItemIcon>
                                 <Typography variant="inherit">Rate this conversation</Typography></MenuItem>
