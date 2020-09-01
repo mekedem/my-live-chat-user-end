@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import ChatLauncher from './components/ChatLauncher';
+import ChatLauncher from './components/chat-launcher/ChatLauncher';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
