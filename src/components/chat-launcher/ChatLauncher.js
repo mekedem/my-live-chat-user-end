@@ -83,6 +83,7 @@ const ChatLauncher = () => {
 
     socket.on(TOKEN, ({ token }) => {
       localStorage.setItem('conversationToken', token);
+      setFirstTime(false);
     });
 
     socket.on(CONNECT, () => {
