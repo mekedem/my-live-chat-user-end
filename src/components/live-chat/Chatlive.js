@@ -63,7 +63,7 @@ const Chatlive = (props) => {
         if (token) {
             api.get('/history', {
                 params: {
-                    fetchedHistoryCount: "2",
+                    fetchedHistoryCount: "0",
                     conversationID: token
                 }
             }).then(res => {
@@ -79,15 +79,17 @@ const Chatlive = (props) => {
                             setChatMessages(chatMessages => [...chatMessages, { msg: msgv }]);
                         }
                     }
-                    scrollbars.current.scrollToBottom();
                 }
             });
         }
     }, []);
 
+    React.useEffect(() => {
+        scrollbars.current.scrollToBottom();
+    },[chatMessages]);
+
     const sendMessage = (e) => {
         e.preventDefault();
-        scrollbars.current.scrollToBottom();
         if(input && ioconnected) {
             const msg = { text: input, sender: [{visitor:true}]};
             const msgv = { text: input, sender: [{visitor:true}], incomming:false};
