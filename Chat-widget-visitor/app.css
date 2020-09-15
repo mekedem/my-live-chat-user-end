@@ -1,0 +1,345 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --main-color: #262f3c;
+  --main-color-light: #EAF0F6;
+  --main-color-dark: #262f3c;
+}
+
+html, body {
+  height: 100%;
+  background-color: #f1f1f1;
+}
+
+body {
+  font-family: Roboto, sans-serif;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+input[type='text'] {
+  outline: 0;
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  border: 2px solid rgb(209, 209, 209);
+  transition: all 0.3s;
+}
+
+input[type='text']:focus {
+  border: 2px solid rgb(184, 184, 184);
+}
+
+button {
+  outline: 0;
+  padding: 6px 10px;
+  background-color: #FFF;
+}
+
+button:active {
+  position: relative;
+  top: 1px;
+}
+
+/*-------------------------------- Chat page--------------------------------- */
+.chat-container {
+  display: flex;
+  flex-wrap: wrap;
+  height: 76%;
+  width: 26%;
+  color: #FFF;
+  background-color: var(--main-color);
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0px 2px 0px 0px rgba(0, 0, 0, 0.2);
+  position: absolute;
+  bottom: 17%;
+  right: 36%;
+}
+
+.chat-header, .chat-sidebar {
+  padding: 15px;
+}
+
+#onoffindicatoron{
+  background-color: green;
+  border-radius: 50%;
+  display: inline-block;
+  color: #460;
+  width: 12px;
+  height: 12px;
+  margin-top: 5px;
+  box-shadow: #000 0 -1px 7px 1px, inset #460 0 -1px 9px, #7D0 0 2px 12px;
+}
+
+#onoffindicatoroff{
+  background-color: grey;
+  border-radius: 50%;
+  display: inline-block;
+  color: #666666;
+  width: 12px;
+  height: 12px;
+  margin-top: 5px;
+  box-shadow: #000 0 -1px 7px 1px, inset #666666 0 -1px 9px, #e6e6e6 0 2px 12px;
+}
+
+#agentName{
+  margin-top: 5px;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 80px;
+}
+
+#avatar_img{
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  padding: 5px;
+}
+
+.chat-header .group-name {
+  flex: 1;
+}
+
+.chat-header .online-users {
+  width: 200px;
+}
+
+.chat-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+}
+
+.chat-sidebar {
+  width: 240px;
+  height: 100%;
+  background-color: var(--main-color-dark);
+}
+
+.chat-sidebar h3 {
+  margin-bottom: 20px;
+}
+
+.chat-sidebar .chat-user {
+  padding: 10px 4px;
+}
+
+.chat-messages {
+  flex: 1;
+  background-color: #FFF;
+  color: var(--main-color-dark);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 10px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 0px grey; 
+  border-radius: 10px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #a6a6a6; 
+  border-radius: 10px;
+}
+
+.chat-messages .message {
+  align-self: flex-start;
+  padding: 10px 15px;
+  background-color: #dedede;
+  margin-bottom: 10px;
+  width: "fit-content";
+  max-width: 85%;
+}
+
+.chat-messages .message .message-text {
+  font-size: 80%;
+}
+
+.chat-messages .message.message-to {
+  background-color: var(--main-color);
+  color: #FFF;
+  align-self: flex-end;
+  border-radius: 8px 8px 0px 8px;
+}
+
+.chat-messages .message.message-from {
+  background-color: var(--main-color-light);
+  color: var(--main-color);
+  align-self: flex-start;
+  border-radius: 8px 8px 8px 0px;
+}
+
+/*----------------- chat footer start and the input form------------------------ */
+
+.chat-footer form {
+  display: flex;
+}
+
+.chat-footer{
+  background-color: #ffffff;
+  padding: 11px;
+}
+
+#messageSendForm > span{
+  font-size: 15px;
+  padding: 5px 5px 0 0;
+  border-color: #ffffff;
+}
+
+#triggerpickerbtn{
+  cursor: pointer;
+}
+
+/*----------------- chat footer end and the input form------------------------ */
+
+/* ----------------------start of foating button widget---------------------- */
+
+#widgetcontainerbox{
+  position: absolute;
+  bottom: 5%;
+  right: 36%;
+}
+
+#customwidget{
+  border-radius: 50%; 
+  width: 60px;
+  height: 60px;
+  background: #262f3c;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+#customwidget > img{
+  width: 45%;
+  margin-top: 15px; 
+}
+
+#notificationbadge{
+  color: #ffffff;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  font-size: smaller;
+  border-radius: 50%;
+  background: red;
+  display: none;
+}
+
+.shower {display: none;}
+
+/* ----------------------end of foating button widget---------------------- */
+
+/* ------------------------start of drop down----------- */
+
+.widgetdropbtn {
+  color: white;
+  border: none;
+  cursor: pointer;
+  height: 30px;
+}
+
+.widgetdropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.widgetdropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: #f9f9f9;
+  min-width: 250px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.widgetdropdown-content .widgetdropdown-item {
+  color: black;
+  padding: 10px;
+  text-decoration: none;
+  display: block;
+  border-bottom: 1px solid #cccccc;
+}
+
+.widgetdropdown-item img{
+  margin-right: 10px;
+}
+
+.widgetdropdown-content .widgetdropdown-item:hover {
+  background-color: #f1f1f1;;
+}
+
+.widgetdropdown:hover .widgetdropdown-content {
+  display: block;
+}
+
+/* ---------------------------------end of drop down--------------- */
+
+/*-----------------------start of register page --------------------*/
+
+.register-container{
+    height: 80%;
+    width: 26%;
+    color: black;
+    background-color: #ffffff;
+    overflow: hidden;
+    margin: 2% auto;
+    border-radius: 16px;
+    box-shadow: 0px 4px 0px 0px rgba(0, 0, 0, 0.2);
+    display: none;
+}
+
+.register-main{
+  margin-top: 35%;
+}
+
+#welcomeregistry{
+  width: 60%;
+  text-align: center;
+  margin-left: 20%;
+  margin-top: 20%;
+}
+
+.register-main > input[type=email]{
+  width: 85%;
+  padding: 15px;
+  margin: 5px 0 22px 22px;
+  display: inline-block;
+  background: #f1f1f1;
+}
+
+.register-main > button{
+  width: 85%;
+  text-align: center;
+  margin: 10px 0 22px 22px;
+  background: var(--main-color);
+  color: #ffffff;
+  padding: 10px;
+}
+
+#registerterms{
+  width: 89%;
+  margin-left: 22px;
+  font-size: 13px;
+}
