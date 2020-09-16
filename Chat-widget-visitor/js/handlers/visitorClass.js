@@ -7,8 +7,8 @@ class Visitor {
         setTimeout(() => {
             this.setupSocket();
         }, 1000);
-
         this.notificationcount = 0;
+        this.projectID = '5f6276e57f237845109bbbff';
     }
 
     insureBrowserID() {
@@ -16,7 +16,6 @@ class Visitor {
             // change this to a more unique id (ex: use UUID)
             const id = Math.random();
             localStorage.setItem("browserID", `${id}`);
-            // localStorage.setItem("NotificationEnabled",true);
         } else {
             console.log('got a browserID');
         }
@@ -49,11 +48,9 @@ class Visitor {
                             }
                         }
                     }
-                    else{
-                        console.log("fetch history error");
-                    }
+                    else console.log("fetch history error");
                 });
-            }
+        }
     }
 
     setupSocket() {
@@ -64,7 +61,7 @@ class Visitor {
             usertype: 'visitor',
             token: token,
             browserID: browserID,
-            projectID: '5f6118297247cf454c39d388',
+            projectID: this.projectID,
         };
 
         this.socket = io('http://localhost:5000', { query: visitorQuery, forceNew: true });
@@ -81,13 +78,13 @@ class Visitor {
         this.socket.on('connect', this.onConnect.bind(this));
         this.socket.on('error', this.onError.bind(this));
 
-        //onsending message
+        //dom variables
         let sendMessageForm = document.querySelector("#messageSendForm");
-        let customwidget = document.querySelector("#customwidget");
-
-        //on options
-        let notification = document.querySelector("#notification");
-        let ratingConv = document.querySelector("#rating");
+        let customwidget = document.querySelector("#customwidget");  //launcher button to show & hide chat
+        let dropdown = document.querySelector("#widgetdropbtn"); //more options vertical icon 
+        let dropdowncontent = document.getElementById("widgetdropdown-content");
+        let notification = document.querySelector("#notification"); // notification item on dropdown
+        let ratingConv = document.querySelector("#rating"); // rating item on dropdown
         
         sendMessageForm.onsubmit = (ev) => { 
             ev.preventDefault();
@@ -97,6 +94,7 @@ class Visitor {
         customwidget.onclick = () => this.onToggleWidget();
         notification.onclick = () => this.onNotification();
         ratingConv.onclick = () => this.onConversationRating();
+        dropdown.onclick = () => dropdowncontent.style.display = 'block';
         
         document.querySelector("#chatMessages").addEventListener('click', (e) => {
             if(e.target.className == 'goodrating') { this.onAfterRating(true); }
@@ -116,7 +114,7 @@ class Visitor {
             this.visitorTyping(e.target.value, false);
             setTimeout(()=>{
                 this.visitorTyping(e.target.value, true);
-            },1000) 
+            },1000); 
         });
     }
 
@@ -131,38 +129,24 @@ class Visitor {
         chatMessagesCtr.scrollTop = chatMessagesCtr.scrollHeight - chatMessagesCtr.clientHeight;
     }
 
-    onAfterRating(liked){
-        let comment = document.querySelector(".rating-input");
-        // do sth here like sending the conversation rating with the comment
-        if(liked){
-            this.appendMessage("Yes, VeryGood!", false);
-        }
-        else{
-            this.appendMessage("No, Poor", false);
-        }
-    }
-
-    onSubmitOfflineMessage(){
-        let offline_email = document.querySelector('.offline-email').value;
-        let offline_input = document.querySelector('.offline-input').value;
-
-        if(offline_email && offline_input){
-            // console.log("hedech alugn");
-        }
-    }
-
+    // display the conversation form
     onConversationRating(){
+        const noioconnection = JSON.parse(localStorage.getItem("iodisconnected"));
         let chatMessagesCtr = document.querySelector("#chatMessages");
         let checkelet = document.querySelector(".goodrating");
         let rmelet = document.getElementsByClassName("message-rating")[0];
-     
-        const ratingEl = document.createElement("div");
-        const ratingup = document.createElement("button");
-        const ratingdown = document.createElement("button");
-
+        let dropdownblock = document.getElementById("widgetdropdown-content");
+        
+        if(noioconnection) return;
         if(checkelet){
             rmelet.parentNode.removeChild(rmelet); //if rating again remove previous one
         }
+     
+        dropdownblock.style.display = 'none';
+
+        const ratingEl = document.createElement("div");
+        const ratingup = document.createElement("button");
+        const ratingdown = document.createElement("button");
 
         ratingEl.className = `message message-rating`;
         ratingEl.innerHTML = `<p class="ratingheaderp">Did you find this helpful?</p> <input type="text" class="rating-input" placeholder="enter your comment"/>`;
@@ -177,7 +161,73 @@ class Visitor {
         ratingEl.appendChild(ratingdown);
 
         chatMessagesCtr.appendChild(ratingEl);
+        chatMessagesCtr.scrollTop = chatMessagesCtr.scrollHeight - chatMessagesCtr.clientHeight;  
+    }
+
+    // after visitor rates the conversation
+    onAfterRating(liked){
+        let comment = document.querySelector(".rating-input");
+        // do sth here like sending the conversation rating with the comment
+        if(liked){
+            this.appendMessage("Yes, VeryGood!", false);
+        }
+        else{
+            this.appendMessage("No, Poor", false);
+        }
+    }
+
+    onSubmitOfflineMessage(){
+        let offline_email = document.querySelector('.offline-email').value;
+        let offline_input = document.querySelector('.offline-input').value;
+        let offline_name = document.querySelector('.offline-name').value;
+        let offline_subject = document.querySelector('.offline-subject').value;
+
+        const mail = { email: offline_name,
+                       name: offline_name,
+                       subject: offline_subject,
+                       text: offline_name
+                    }
+
+        if(offline_email && offline_input && offline_name && offline_subject){
+            const requestOptions = {
+                method: "POST",
+                headers: { "Content-Type": "application/json"},
+                body: JSON.stringify(mail),
+              };
+            
+              let response = fetch(`http://localhost:5000/visitor/${this.projectID}/offlineMessage`, requestOptions);
+              if (response.ok) {
+                this.disableOfflineMessage();
+                // return response.json();
+              } else {
+                throw new Error("something went wrong on sending email!!");
+              }
+        }
+    }
+
+    offlineFormDisplay(){
+        let chatMessagesCtr = document.querySelector("#chatMessages");
+        const offlineEl = document.createElement("div");
+
+        offlineEl.className = `message message-offline`;
+        offlineEl.innerHTML = `<p class="ratingheaderp">We are offline now. we will reply via email please leave here your email and your message your email and your message </p><input type="text" class="offline-name" placeholder="Enter name here"/> <input type="email" class="offline-email" placeholder="email@example.com"/><input type="text" class="offline-subject" placeholder="Enter subject here"/> <input type="text" class="offline-input" placeholder="message here..."/>`;
+
+        chatMessagesCtr.appendChild(offlineEl);
         chatMessagesCtr.scrollTop = chatMessagesCtr.scrollHeight - chatMessagesCtr.clientHeight;
+    }
+
+    removeOfflineForm(){
+        let rmform = document.getElementsByClassName("message-offline")[0];
+        if(rmform){
+            rmform.parentNode.removeChild(rmform);
+        }
+    }
+
+    disableOfflineMessage(){
+        document.getElementsByClassName("offline-email").disabled = true;
+        document.getElementsByClassName("offline-name").disabled = true;
+        document.getElementsByClassName("offline-subject").disabled = true;
+        document.getElementsByClassName("offline-input").disabled = true;
     }
 
     // for the launcher button if you want to display the chat or minimize
@@ -203,28 +253,13 @@ class Visitor {
         }
     }
 
-    offlineFormDisplay(){
-        let chatMessagesCtr = document.querySelector("#chatMessages");
-        const offlineEl = document.createElement("div");
-
-        offlineEl.className = `message message-offline`;
-        offlineEl.innerHTML = `<p class="ratingheaderp">We are offline now. we will reply via email please leave here your email and your message your email and your message </p> <input type="email" class="offline-email" placeholder="email@example.com"/> <input type="text" class="offline-input" placeholder="message here..."/>`;
-
-        chatMessagesCtr.appendChild(offlineEl);
-        chatMessagesCtr.scrollTop = chatMessagesCtr.scrollHeight - chatMessagesCtr.clientHeight;
-    }
-
-    removeOfflineForm(){
-        let rmform = document.getElementsByClassName("message-offline")[0];
-        if(rmform){
-            rmform.parentNode.removeChild(rmform);
-        }
-    }
-
-    // for enabling and disabling notification
+    // for enabling and disabling notification option
     onNotification(){
         let getnotified = JSON.parse(localStorage.getItem("NotificationEnabled"));
         let enabledisabletext = document.querySelector("#enabledisable");
+        let dropdownblock = document.getElementById("widgetdropdown-content");
+     
+        dropdownblock.style.display = 'none';
 
         if(getnotified){
             enabledisabletext.textContent = "Notification off";
@@ -261,12 +296,14 @@ class Visitor {
         }
     }
 
+    // when visitor sends message
     onSend() {
         let messageInput = document.querySelector("#messageInput");
-        let chatMessagesCtr = document.querySelector("#chatMessages");
-        const el = chatMessagesCtr;
+        const noioconnection = JSON.parse(localStorage.getItem("iodisconnected"));
 
+        if(noioconnection) return;
         if (!messageInput.value) return;
+
         const msg = { text: messageInput.value, time: Date.now() };
         this.socket.emit(E.MESSAGE, msg);
         this.appendMessage(messageInput.value, false);
@@ -290,7 +327,7 @@ class Visitor {
 
     // -------------------- socket io handlers --------------------
     onMessage(msg) {
-        const { text, time } = msg; // may also contain file: {mime, name, size, url}
+        //msg may also contain file: {mime, name, size, url}
         if (msg.agentsOnly) {
             // only seen to agents
         }
@@ -298,7 +335,6 @@ class Visitor {
             if(msg.sender.agent){
                 this.appendMessage(msg.text, true);
                 this.countNotification();
-                // setNotificationCount(notificationCount => notificationCount + 1);
             }
             else if(msg.sender.visitor){
                 this.appendMessage(msg.text, false);
@@ -320,33 +356,33 @@ class Visitor {
         const { name, avatarURL } = agent;
         let agentName = document.querySelector("#agentName");
         agentName.innerHTML = name + "";
-        // this.appendMessage(`assigned to agent ${name}`);
     }
 
     onAgentLeft() {
         let agentName = document.querySelector("#agentName");
-        agentName.innerHTML = "";
-        // this.appendMessage('agent left the conversation');
+        agentName.innerHTML = "Hi there";
     }
 
     onToken(auth) {
         const { token } = auth;
         this.setCookie("conversationToken",token,365);
-        console.log("token : metual : ", token);
     }
 
     onOnline(){
         this.removeOfflineForm();
-        // offline online icon toggle
+        document.getElementById("onoffindicatoroff").id = "onoffindicatoron";
     }
 
     onOffline() {
-        // offline online icon toggle
+        let icon = document.getElementById("onoffindicatoron");
         this.offlineFormDisplay();
-        // console.log("offline nen bakih");
+        if(icon){
+            document.getElementById("onoffindicatoron").id = "onoffindicatoroff";
+        }
     }
 
     onConnect() {
+        localStorage.setItem("iodisconnected",false);
         console.log("socket connected to server");
     }
 
@@ -355,7 +391,7 @@ class Visitor {
     }
 
     onDisconnect() {
-
+        localStorage.setItem("iodisconnected",true);
     }
 
     onError(err) {
