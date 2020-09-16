@@ -54,31 +54,26 @@
   <script src="./js/constants.js"></script>
   <script src="./js/handlers/visitorClass.js"></script>
   <script>
-    window.addEventListener("DOMContentLoaded", () => {
+    let messageInput = document.querySelector("#messageInput");
+    let triggerbutton = document.querySelector("#triggerpickerbtn");
+    const picker = new EmojiButton({
+      position: 'auto',
+    });
+    picker.on('emoji', function(emoji){
+          messageInput.value += emoji;
+    });
+    triggerbutton.addEventListener('click', function(){
+      picker.pickerVisible ? picker.hidePicker() : picker.showPicker(messageInput);
+    });
+</script>
+  <script>
+      window.addEventListener("DOMContentLoaded", () => {
       let notified = JSON.parse(localStorage.getItem("NotificationEnabled"));
       let enabledisabletext = document.querySelector("#enabledisable");
-      let messageInput = document.querySelector("#messageInput");
-      let triggerbutton = document.querySelector("#triggerpickerbtn");
-
-      if(notified){
-        enabledisabletext.textContent = "Notification on"
-      }
-      else{
-        enabledisabletext.textContent = "Notification off"
-      }
-      new Visitor("telegram");
-
-      const picker = new EmojiButton({
-        position: 'auto',
-      });
-
-      picker.on('emoji', function(emoji){
-            messageInput.value += emoji;
-        });
-
-      triggerbutton.addEventListener('click', function(){
-        picker.pickerVisible ? picker.hidePicker() : picker.showPicker(messageInput);
-      });
+      
+      if(notified){ enabledisabletext.textContent = "Notification on" }
+      else{ enabledisabletext.textContent = "Notification off" }
+      new Visitor("telegram"); 
     });
   </script>
 </body>

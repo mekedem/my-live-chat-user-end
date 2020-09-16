@@ -3,10 +3,11 @@ class Visitor {
     constructor(agency) {
         this.room = null;
         this.insureBrowserID();
-        // this.createChatBox();
+        this.fetchHistoryIfPossible();
         setTimeout(() => {
             this.setupSocket();
         }, 1000);
+
         this.notificationcount = 0;
     }
 
@@ -21,6 +22,40 @@ class Visitor {
         }
     }
 
+    fetchHistoryIfPossible(){
+        const token = this.getCookie('conversationToken');
+        if(token){
+        const requestOptions = {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token,
+              getTheLast: "2",
+              fetchedHistoryCount:"0"
+            }
+          };
+          
+        fetch(`http://localhost:5000/visitor/history`,requestOptions)
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success){
+                        const temp = data.data.history;
+                        for (let j = 0; j < temp.length; j++) {
+                            if (temp[j].sender.agent) {
+                                this.appendMessage(temp[j].text, true);
+                            }
+                            else if (temp[j].sender.visitor) {
+                                this.appendMessage(temp[j].text, false);
+                            }
+                        }
+                    }
+                    else{
+                        console.log("fetch history error");
+                    }
+                });
+            }
+    }
+
     setupSocket() {
         const token = this.getCookie('conversationToken');
         const browserID = localStorage.getItem('browserID');
@@ -29,16 +64,18 @@ class Visitor {
             usertype: 'visitor',
             token: token,
             browserID: browserID,
-            projectID: '5f5d2169c6f5033678f48cfb',
+            projectID: '5f6118297247cf454c39d388',
         };
 
         this.socket = io('http://localhost:5000', { query: visitorQuery, forceNew: true });
+        this.startConversation();
 
         this.socket.on(E.AGENTASSIGNED, this.onAgentssigned.bind(this));
         this.socket.on(E.AGENTLEFT, this.onAgentLeft.bind(this));
         this.socket.on(E.MESSAGE, this.onMessage.bind(this));
         this.socket.on(E.OFFLINE, this.onOffline.bind(this));
         this.socket.on(E.TOKEN, this.onToken.bind(this));
+        this.socket.on(E.ONLINE, this.onOnline.bind(this));
 
         // reserved event names.
         this.socket.on('connect', this.onConnect.bind(this));
@@ -47,8 +84,11 @@ class Visitor {
         //onsending message
         let sendMessageForm = document.querySelector("#messageSendForm");
         let customwidget = document.querySelector("#customwidget");
-        let notification = document.querySelector("#notification");
 
+        //on options
+        let notification = document.querySelector("#notification");
+        let ratingConv = document.querySelector("#rating");
+        
         sendMessageForm.onsubmit = (ev) => { 
             ev.preventDefault();
             this.onSend();
@@ -56,6 +96,28 @@ class Visitor {
 
         customwidget.onclick = () => this.onToggleWidget();
         notification.onclick = () => this.onNotification();
+        ratingConv.onclick = () => this.onConversationRating();
+        
+        document.querySelector("#chatMessages").addEventListener('click', (e) => {
+            if(e.target.className == 'goodrating') { this.onAfterRating(true); }
+            else if(e.target.className == 'likebutton'){ this.onAfterRating(true); }
+            else if(e.target.className == 'badrating'){ this.onAfterRating(false); }
+            else if(e.target.className == 'dislikebutton'){ this.onAfterRating(false); }
+            else{ return }
+        });
+
+        document.querySelector('#chatMessages').addEventListener('keypress', (e) => {
+            if(e.target.className == 'offline-input'){
+                if(e.key === 'Enter'){ this.onSubmitOfflineMessage(); }
+            }
+        });
+
+        document.querySelector('#messageInput').addEventListener('input', (e) => { 
+            this.visitorTyping(e.target.value, false);
+            setTimeout(()=>{
+                this.visitorTyping(e.target.value, true);
+            },1000) 
+        });
     }
 
     appendMessage(text, incomming) {
@@ -69,6 +131,56 @@ class Visitor {
         chatMessagesCtr.scrollTop = chatMessagesCtr.scrollHeight - chatMessagesCtr.clientHeight;
     }
 
+    onAfterRating(liked){
+        let comment = document.querySelector(".rating-input");
+        // do sth here like sending the conversation rating with the comment
+        if(liked){
+            this.appendMessage("Yes, VeryGood!", false);
+        }
+        else{
+            this.appendMessage("No, Poor", false);
+        }
+    }
+
+    onSubmitOfflineMessage(){
+        let offline_email = document.querySelector('.offline-email').value;
+        let offline_input = document.querySelector('.offline-input').value;
+
+        if(offline_email && offline_input){
+            // console.log("hedech alugn");
+        }
+    }
+
+    onConversationRating(){
+        let chatMessagesCtr = document.querySelector("#chatMessages");
+        let checkelet = document.querySelector(".goodrating");
+        let rmelet = document.getElementsByClassName("message-rating")[0];
+     
+        const ratingEl = document.createElement("div");
+        const ratingup = document.createElement("button");
+        const ratingdown = document.createElement("button");
+
+        if(checkelet){
+            rmelet.parentNode.removeChild(rmelet); //if rating again remove previous one
+        }
+
+        ratingEl.className = `message message-rating`;
+        ratingEl.innerHTML = `<p class="ratingheaderp">Did you find this helpful?</p> <input type="text" class="rating-input" placeholder="enter your comment"/>`;
+
+        ratingup.className = `goodrating`;
+        ratingup.innerHTML = `<p class="likebutton"> &#128077; </p>`;
+
+        ratingdown.className = `badrating`;
+        ratingdown.innerHTML = `<p class="dislikebutton"> &#128078; </p>`;
+        
+        ratingEl.appendChild(ratingup);
+        ratingEl.appendChild(ratingdown);
+
+        chatMessagesCtr.appendChild(ratingEl);
+        chatMessagesCtr.scrollTop = chatMessagesCtr.scrollHeight - chatMessagesCtr.clientHeight;
+    }
+
+    // for the launcher button if you want to display the chat or minimize
     onToggleWidget(){
         let x = document.getElementById("chat-container");
         let y = document.getElementById("widgetimageicon");
@@ -91,6 +203,24 @@ class Visitor {
         }
     }
 
+    offlineFormDisplay(){
+        let chatMessagesCtr = document.querySelector("#chatMessages");
+        const offlineEl = document.createElement("div");
+
+        offlineEl.className = `message message-offline`;
+        offlineEl.innerHTML = `<p class="ratingheaderp">We are offline now. we will reply via email please leave here your email and your message your email and your message </p> <input type="email" class="offline-email" placeholder="email@example.com"/> <input type="text" class="offline-input" placeholder="message here..."/>`;
+
+        chatMessagesCtr.appendChild(offlineEl);
+        chatMessagesCtr.scrollTop = chatMessagesCtr.scrollHeight - chatMessagesCtr.clientHeight;
+    }
+
+    removeOfflineForm(){
+        let rmform = document.getElementsByClassName("message-offline")[0];
+        if(rmform){
+            rmform.parentNode.removeChild(rmform);
+        }
+    }
+
     // for enabling and disabling notification
     onNotification(){
         let getnotified = JSON.parse(localStorage.getItem("NotificationEnabled"));
@@ -106,7 +236,7 @@ class Visitor {
         }
     }
 
-    // for the count on the badge
+    // for the count increament and visibility on the badge
     countNotification(){
         let notifymebadge = document.getElementById("notificationbadge");
         let visiblityc = document.getElementById("chat-container");
@@ -149,6 +279,8 @@ class Visitor {
 
     startConversation() {
         const visitoremail = localStorage.getItem("visitoremail");
+        const token = this.getCookie('conversationToken');
+        if(token) return;
         this.socket.emit(E.STARTCONVERSATION, { email: visitoremail });
     }
 
@@ -174,6 +306,16 @@ class Visitor {
         }
     }
 
+    visitorTyping(message, ispreview){
+        const preview = { text: message };
+        if(ispreview){
+            this.socket.emit(E.SNEAKPREVIEW, preview);
+        }
+        else{
+            this.socket.emit(E.VISITORTYPING);
+        }
+    }
+
     onAgentssigned(agent) {
         const { name, avatarURL } = agent;
         let agentName = document.querySelector("#agentName");
@@ -190,10 +332,18 @@ class Visitor {
     onToken(auth) {
         const { token } = auth;
         this.setCookie("conversationToken",token,365);
+        console.log("token : metual : ", token);
+    }
+
+    onOnline(){
+        this.removeOfflineForm();
+        // offline online icon toggle
     }
 
     onOffline() {
-        // this.appendMessage('agent or agency offline', true);
+        // offline online icon toggle
+        this.offlineFormDisplay();
+        // console.log("offline nen bakih");
     }
 
     onConnect() {
@@ -201,7 +351,7 @@ class Visitor {
     }
 
     onReconnect() {
-
+        // console.log()
     }
 
     onDisconnect() {
