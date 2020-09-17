@@ -169,7 +169,7 @@ class Visitor {
         }
     }
 
-    onSubmitOfflineMessage(){
+    async onSubmitOfflineMessage(){
         let offline_email = document.querySelector('.offline-email').value;
         let offline_input = document.querySelector('.offline-input').value;
         let offline_name = document.querySelector('.offline-name').value;
@@ -188,9 +188,11 @@ class Visitor {
                 body: JSON.stringify(mail),
               };
             
-              let response = fetch(`http://localhost:5000/visitor/${this.projectID}/offlineMessage`, requestOptions);
-              if (response.ok) {
+              let response = await fetch(`http://localhost:5000/visitor/${this.projectID}/offlineMessage`, requestOptions);
+            // console.log(response);
+                if (response.ok) {
                 this.disableOfflineMessage();
+                console.log("disable now");
                 // return response.json();
               } else {
                 throw new Error("something went wrong on sending email!!");
@@ -217,10 +219,10 @@ class Visitor {
     }
 
     disableOfflineMessage(){
-        document.getElementsByClassName("offline-email").disabled = true;
-        document.getElementsByClassName("offline-name").disabled = true;
-        document.getElementsByClassName("offline-subject").disabled = true;
-        document.getElementsByClassName("offline-input").disabled = true;
+        document.querySelector(".offline-email").disabled = true;
+        document.querySelector(".offline-name").disabled = true;
+        document.querySelector(".offline-subject").disabled = true;
+        document.querySelector(".offline-input").disabled = true;
     }
 
     // for the launcher button if you want to display the chat or minimize
