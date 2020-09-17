@@ -8,11 +8,16 @@
   --main-color: #262f3c;
   --main-color-light: #EAF0F6;
   --main-color-dark: #262f3c;
+  --main-background-color: #f1f1f1;
+  --main-button-default: #FFF;
+  --chat-message-background: #dedede;
+  --lighter-grey: #a6a6a6;
+  --plain-white: #ffffff;
 }
 
 html, body {
   height: 100%;
-  background-color: #f1f1f1;
+  background-color: var(--main-background-color);
 }
 
 body {
@@ -39,7 +44,7 @@ input[type='text']:focus,input[type='email'] {
 button {
   outline: 0;
   padding: 6px 10px;
-  background-color: #FFF;
+  background-color: var(--main-button-default);
 }
 
 button:active {
@@ -53,7 +58,7 @@ button:active {
   flex-wrap: wrap;
   height: 76%;
   width: 26%;
-  color: #FFF;
+  color: var(--main-button-default);
   background-color: var(--main-color);
   overflow: hidden;
   border-radius: 16px;
@@ -139,7 +144,7 @@ button:active {
 
 .chat-messages {
   flex: 1;
-  background-color: #FFF;
+  background-color: var(--main-button-default);
   color: var(--main-color-dark);
   padding: 15px;
   display: flex;
@@ -157,14 +162,14 @@ button:active {
 }
 
 .chat-messages::-webkit-scrollbar-thumb {
-  background: #a6a6a6; 
+  background: var(--lighter-grey); 
   border-radius: 10px;
 }
 
 .chat-messages .message {
   align-self: flex-start;
   padding: 10px 15px;
-  background-color: #dedede;
+  background-color: var(--chat-message-background);
   margin-bottom: 10px;
   width: "fit-content";
   max-width: 85%;
@@ -176,7 +181,7 @@ button:active {
 
 .chat-messages .message.message-to {
   background-color: var(--main-color);
-  color: #FFF;
+  color: var(--main-button-default);
   align-self: flex-end;
   border-radius: 8px 8px 0px 8px;
 }
@@ -197,7 +202,6 @@ button:active {
 
 .offline-input{
   height: 40px;
-  margin-top: 3px;
 }
 
 .offline-name{
@@ -205,6 +209,10 @@ button:active {
 }
 
 .offline-subject{
+  margin-bottom: 3px;
+}
+
+.offline-email{
   margin-bottom: 3px;
 }
 
@@ -223,24 +231,24 @@ button:active {
 }
 
 .goodrating{
-  background-color: #f1f1f1;
+  background-color: var(--main-background-color);
   margin-top: 5px;
   padding-left: 10px;
   padding-right: 10px;
   width: 100px;
   margin-right: 4px;
   border: none;
-  box-shadow: 1px 1px 1px 1px #a6a6a6;
+  box-shadow: 1px 1px 1px 1px var(--lighter-grey);
 }
 
 .badrating{
-  background-color: #f1f1f1;
+  background-color: var(--main-background-color);
   margin-top: 5px;
   padding-left: 10px;
   padding-right: 10px;
   width: 100px;
   border: none;
-  box-shadow: 1px 1px 1px 1px #a6a6a6;
+  box-shadow: 1px 1px 1px 1px var(--lighter-grey);
 }
 
 /*----------------- chat footer start and the input form------------------------ */
@@ -250,14 +258,14 @@ button:active {
 }
 
 .chat-footer{
-  background-color: #ffffff;
+  background-color: var(--plain-white);
   padding: 11px;
 }
 
 #messageSendForm > span{
   font-size: 15px;
   padding: 5px 5px 0 0;
-  border-color: #ffffff;
+  border-color: var(--plain-white);
 }
 
 #triggerpickerbtn{
@@ -278,7 +286,7 @@ button:active {
   border-radius: 50%; 
   width: 60px;
   height: 60px;
-  background: #262f3c;
+  background: var(--main-color-dark);
   box-sizing: border-box;
   text-align: center;
 }
@@ -289,7 +297,7 @@ button:active {
 }
 
 #notificationbadge{
-  color: #ffffff;
+  color: var(--plain-white);
   position: absolute;
   top: 0;
   right: 0;
@@ -342,7 +350,7 @@ button:active {
 }
 
 .widgetdropdown-content .widgetdropdown-item:hover {
-  background-color: #f1f1f1;;
+  background-color: var(--main-background-color);
 }
 
 .widgetdropdown:hover .widgetdropdown-content {
@@ -357,7 +365,7 @@ button:active {
     height: 80%;
     width: 26%;
     color: black;
-    background-color: #ffffff;
+    background-color: var(--plain-white);
     overflow: hidden;
     margin: 2% auto;
     border-radius: 16px;
@@ -381,7 +389,7 @@ button:active {
   padding: 15px;
   margin: 5px 0 22px 22px;
   display: inline-block;
-  background: #f1f1f1;
+  background: var(--main-background-color);
 }
 
 .register-main > button{
@@ -389,7 +397,7 @@ button:active {
   text-align: center;
   margin: 10px 0 22px 22px;
   background: var(--main-color);
-  color: #ffffff;
+  color: var(--plain-white);
   padding: 10px;
 }
 

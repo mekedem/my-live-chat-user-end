@@ -81,8 +81,7 @@ class Visitor {
         //dom variables
         let sendMessageForm = document.querySelector("#messageSendForm");
         let customwidget = document.querySelector("#customwidget");  //launcher button to show & hide chat
-        let dropdown = document.querySelector("#widgetdropbtn"); //more options vertical icon 
-        let dropdowncontent = document.getElementById("widgetdropdown-content");
+
         let notification = document.querySelector("#notification"); // notification item on dropdown
         let ratingConv = document.querySelector("#rating"); // rating item on dropdown
         
@@ -94,25 +93,22 @@ class Visitor {
         customwidget.onclick = () => this.onToggleWidget();
         notification.onclick = () => this.onNotification();
         ratingConv.onclick = () => this.onConversationRating();
-        dropdown.onclick = () => dropdowncontent.style.display = 'block';
         
         document.querySelector("#chatMessages").addEventListener('click', (e) => {
-            if(e.target.className == 'goodrating') { this.onAfterRating(true); }
-            else if(e.target.className == 'likebutton'){ this.onAfterRating(true); }
-            else if(e.target.className == 'badrating'){ this.onAfterRating(false); }
-            else if(e.target.className == 'dislikebutton'){ this.onAfterRating(false); }
+            if(e.target.className == 'goodrating' || e.target.className == 'likebutton') { this.onAfterRating(true); }
+            else if(e.target.className == 'badrating' || e.target.className == 'dislikebutton'){ this.onAfterRating(false); }
             else{ return }
         });
 
         document.querySelector('#chatMessages').addEventListener('keypress', (e) => {
-            if(e.target.className == 'offline-input'){
+            if(e.target.className == 'offline-input' || e.target.className == 'offline-name' || e.target.className == 'offline-subject' || e.target.className == 'offline-email'){
                 if(e.key === 'Enter'){ this.onSubmitOfflineMessage(); }
             }
         });
 
         document.querySelector('#messageInput').addEventListener('input', (e) => { 
             this.visitorTyping(e.target.value, false);
-            setTimeout(()=>{
+            setTimeout(() => {
                 this.visitorTyping(e.target.value, true);
             },1000); 
         });
@@ -135,14 +131,11 @@ class Visitor {
         let chatMessagesCtr = document.querySelector("#chatMessages");
         let checkelet = document.querySelector(".goodrating");
         let rmelet = document.getElementsByClassName("message-rating")[0];
-        let dropdownblock = document.getElementById("widgetdropdown-content");
         
         if(noioconnection) return;
         if(checkelet){
             rmelet.parentNode.removeChild(rmelet); //if rating again remove previous one
         }
-     
-        dropdownblock.style.display = 'none';
 
         const ratingEl = document.createElement("div");
         const ratingup = document.createElement("button");
@@ -257,16 +250,13 @@ class Visitor {
     onNotification(){
         let getnotified = JSON.parse(localStorage.getItem("NotificationEnabled"));
         let enabledisabletext = document.querySelector("#enabledisable");
-        let dropdownblock = document.getElementById("widgetdropdown-content");
-     
-        dropdownblock.style.display = 'none';
 
         if(getnotified){
-            enabledisabletext.textContent = "Notification off";
+            enabledisabletext.textContent = "Notification on";
             localStorage.setItem("NotificationEnabled",false);
         }
         else{
-            enabledisabletext.textContent = "Notification on";
+            enabledisabletext.textContent = "Notification off";
             localStorage.setItem("NotificationEnabled",true);
         }
     }
@@ -354,12 +344,12 @@ class Visitor {
 
     onAgentssigned(agent) {
         const { name, avatarURL } = agent;
-        let agentName = document.querySelector("#agentName");
+        let agentName = document.querySelector("#agent_Name");
         agentName.innerHTML = name + "";
     }
 
     onAgentLeft() {
-        let agentName = document.querySelector("#agentName");
+        let agentName = document.querySelector("#agent_Name");
         agentName.innerHTML = "Hi there";
     }
 

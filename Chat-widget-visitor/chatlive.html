@@ -16,7 +16,7 @@
       <div class="chat-header">
         <img id="avatar_img" src="avatar.png" alt="Avatar" class="avatar">
         <div id="agentName" class="group-name">
-          Hi there
+          <span id="agent_Name">Hi there</span>
           <span id="onoffindicatoroff">o</span>
         </div>
         <div>
@@ -50,7 +50,6 @@
     </div>
   </div>
   <script src="./js/constants.js"></script>
-  <script src="./js/handlers/visitorClass.js"></script>
   <script>
     let messageInput = document.querySelector("#messageInput");
     let triggerbutton = document.querySelector("#triggerpickerbtn");
@@ -62,11 +61,12 @@
       window.addEventListener("DOMContentLoaded", () => {
       let notified = JSON.parse(localStorage.getItem("NotificationEnabled"));
       let enabledisabletext = document.querySelector("#enabledisable");
-      if(notified){ enabledisabletext.textContent = "Notification on" }
-      else{ enabledisabletext.textContent = "Notification off" }
+      if(notified){ enabledisabletext.textContent = "Notification off" }
+      else{ enabledisabletext.textContent = "Notification on" }
       new Visitor("telegram"); 
     });
   </script>
+  <script src="./js/handlers/visitorClass.js"></script>
 </body>
 
 </html>

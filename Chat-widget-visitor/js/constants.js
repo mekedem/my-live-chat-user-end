@@ -18,3 +18,18 @@ const E = {
     VISITORTYPING: 'VISITORTYPING',
     SNEAKPREVIEW: 'SNEAKPREVIEW'
 };
+
+const SETTINGS = {
+    active: true,
+    waitTime: 0,
+    soundNotification: false,
+    browserTabNotification: false,
+    showAgentTyping: false,
+    showVisitorTyping: false,
+    sneakPreview: false,
+    hideWidgetWhenOffline: false,
+    hideWidgetOnMobile: false,
+    fileUploadAllowed: false,
+    chatRatingAllowed: false,
+    emojiInChatAllowed: false,
+};
