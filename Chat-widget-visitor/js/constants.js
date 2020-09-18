@@ -21,15 +21,15 @@ const E = {
 
 const SETTINGS = {
     active: true,
-    waitTime: 0,
+    waitTime: 2000,
     soundNotification: false,
     browserTabNotification: false,
     showAgentTyping: false,
-    showVisitorTyping: false,
-    sneakPreview: false,
+    showVisitorTyping: true,
+    sneakPreview: true,
     hideWidgetWhenOffline: false,
     hideWidgetOnMobile: false,
     fileUploadAllowed: false,
-    chatRatingAllowed: false,
-    emojiInChatAllowed: false,
+    chatRatingAllowed: true,
+    emojiInChatAllowed: true,
 };

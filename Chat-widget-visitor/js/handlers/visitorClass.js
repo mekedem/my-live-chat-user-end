@@ -2,6 +2,7 @@ class Visitor {
 
     constructor(agency) {
         this.room = null;
+        this.enforceProjectSettings();
         this.insureBrowserID();
         this.fetchHistoryIfPossible();
         setTimeout(() => {
@@ -11,14 +12,30 @@ class Visitor {
         this.projectID = '5f6276e57f237845109bbbff';
     }
 
+    enforceProjectSettings(){
+    if(SETTINGS.hideWidgetOnMobile){
+        //if moblie hide widget i don't know what to hide exactly
+    }
+    if(SETTINGS.fileUploadAllowed){
+        // do some hiding here also
+    }
+    if(!SETTINGS.chatRatingAllowed){document.getElementById('rating').style.display = 'display'}
+    if(!SETTINGS.emojiInChatAllowed){document.getElementById('triggerpickerbtn').style.display = 'none';}
+    }
+
     insureBrowserID() {
         if (!localStorage.getItem("browserID")) {
-            // change this to a more unique id (ex: use UUID)
-            const id = Math.random();
+            const id = Math.random(); // change this to generateUUID()
             localStorage.setItem("browserID", `${id}`);
+            
         } else {
             console.log('got a browserID');
         }
+    }
+
+    generateUUID(){
+        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => 
+            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
     }
 
     fetchHistoryIfPossible(){
@@ -97,7 +114,7 @@ class Visitor {
         document.querySelector("#chatMessages").addEventListener('click', (e) => {
             if(e.target.className == 'goodrating' || e.target.className == 'likebutton') { this.onAfterRating(true); }
             else if(e.target.className == 'badrating' || e.target.className == 'dislikebutton'){ this.onAfterRating(false); }
-            else{ return }
+            else { return }
         });
 
         document.querySelector('#chatMessages').addEventListener('keypress', (e) => {
@@ -107,10 +124,13 @@ class Visitor {
         });
 
         document.querySelector('#messageInput').addEventListener('input', (e) => { 
-            this.visitorTyping(e.target.value, false);
-            setTimeout(() => {
-                this.visitorTyping(e.target.value, true);
-            },1000); 
+            if(SETTINGS.showVisitorTyping) this.visitorTyping(e.target.value, false);
+            if(SETTINGS.sneakPreview){
+                setTimeout(() => {
+                    this.visitorTyping(e.target.value, true);
+                },1000);
+            }
+            else { return }
         });
     }
 
@@ -175,7 +195,7 @@ class Visitor {
         let offline_name = document.querySelector('.offline-name').value;
         let offline_subject = document.querySelector('.offline-subject').value;
 
-        const mail = { email: offline_name,
+        const mail = { email: offline_email,
                        name: offline_name,
                        subject: offline_subject,
                        text: offline_name
@@ -192,7 +212,6 @@ class Visitor {
             // console.log(response);
                 if (response.ok) {
                 this.disableOfflineMessage();
-                console.log("disable now");
                 // return response.json();
               } else {
                 throw new Error("something went wrong on sending email!!");
@@ -366,8 +385,10 @@ class Visitor {
     }
 
     onOffline() {
-        let icon = document.getElementById("onoffindicatoron");
+        // if (SETTINGS.hideWidgetWhenOffline){}
+
         this.offlineFormDisplay();
+        let icon = document.getElementById("onoffindicatoron");
         if(icon){
             document.getElementById("onoffindicatoron").id = "onoffindicatoroff";
         }

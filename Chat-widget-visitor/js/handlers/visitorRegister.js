@@ -5,36 +5,44 @@ let widgetfab = document.querySelector("#widgetcontainerbox");
 let widgetimage = document.querySelector("#widgetimageicon");
 
 window.addEventListener("DOMContentLoaded", () => {
-    if(getCookie("conversationToken")){
-        window.location.href = 'chatlive.html';
-    }
+    if(getCookie("conversationToken")) window.location.href = 'chatlive.html';
+    waitAndInitialize();
 });
+
+function waitAndInitialize(){
+    let regxform = document.getElementById("register-container");
+    let widgetLauncher = document.getElementById("widgetimageicon");
+    
+    setTimeout(() => {
+        regxform.style.display = "block";
+        widgetLauncher.src='./smsinactiveicon.png';
+    },SETTINGS.waitTime);
+}
 
 registerform.onsubmit = (ev) => {
   ev.preventDefault();
-  if (!visitoremail.value){
-    return;
-  }
-localStorage.setItem("visitoremail",visitoremail.value);
-window.location.href = 'chatlive.html';
+  if (!visitoremail.value) return;
+  
+  localStorage.setItem("visitoremail",visitoremail.value);
+  window.location.href = 'chatlive.html';
 };
 
 widgetfab.onclick = () => {
-    let x = document.getElementById("register-container");
-    let y = document.getElementById("widgetimageicon");
+    let regxform = document.getElementById("register-container");
+    let widgetLauncher = document.getElementById("widgetimageicon");
     
-    if (x.style.display === "none") {
-        x.style.display = "block";
-        y.src='./smsinactiveicon.png';
+    if (regxform.style.display === "none") {
+        regxform.style.display = "block";
+        widgetLauncher.src='./smsinactiveicon.png';
     }
     else{
-        if(x.style.display === "block"){
-            x.style.display = "none";
-            y.src='./smsactiveicon.png';
+        if(regxform.style.display === "block"){
+            regxform.style.display = "none";
+            widgetLauncher.src='./smsactiveicon.png';
         }
         else{
-            x.style.display = "block";
-            y.src='./smsinactiveicon.png';
+            regxform.style.display = "block";
+            widgetLauncher.src='./smsinactiveicon.png';
         }
     }
 }
