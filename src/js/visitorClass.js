@@ -108,18 +108,13 @@ class Visitor {
         document.querySelector("#chatMessages").addEventListener('click', (e) => {
             if (e.target.className == 'goodrating' || e.target.className == 'likebutton') { this.onAfterRating(true); }
             else if (e.target.className == 'badrating' || e.target.className == 'dislikebutton') { this.onAfterRating(false); }
+            else if (e.target.className == 'offline-button'){ this.onSubmitOfflineMessage(); }
             else { return }
         });
 
-        document.querySelector('#chatMessages').addEventListener('keypress', (e) => {
-            if (e.target.className == 'offline-input' || e.target.className == 'offline-name' || e.target.className == 'offline-subject' || e.target.className == 'offline-email') {
-                if (e.key === 'Enter') { this.onSubmitOfflineMessage(); }
-            }
-        });
-
         document.querySelector('#messageInput').addEventListener('input', (e) => {
-            if(SETTINGS.showVisitorTyping) this.visitorTyping(e.target.value, false);
-            if(SETTINGS.sneakPreview){
+            if (SETTINGS.showVisitorTyping) this.visitorTyping(e.target.value, false);
+            if (SETTINGS.sneakPreview){
                 setTimeout(() => {
                     this.visitorTyping(e.target.value, true);
                 },1000);
@@ -216,11 +211,13 @@ class Visitor {
     }
 
     offlineFormDisplay() {
+        if(document.querySelector('#message-offline')) return;
         let chatMessagesCtr = document.querySelector("#chatMessages");
         const offlineEl = document.createElement("div");
 
         offlineEl.className = `message message-offline`;
-        offlineEl.innerHTML = `<p class="ratingheaderp">We are offline now. we will reply via email please leave here your email and your message your email and your message </p><input type="text" class="offline-name" placeholder="Jhon doe"/> <input type="email" class="offline-email" placeholder="email@example.com"/><input type="text" class="offline-subject" placeholder="Enter subject here"/> <input type="text" class="offline-input" placeholder="your message here..."/>`;
+        offlineEl.id = `message-offline`;
+        offlineEl.innerHTML = `<p class="ratingheaderp">We are offline now. we will reply via email please leave here your email and your message your email and your message </p><input type="text" class="offline-name" placeholder="Jhon doe"/> <input type="email" class="offline-email" placeholder="email@example.com"/><input type="text" class="offline-subject" placeholder="Enter subject here"/> <input type="text" class="offline-input" placeholder="your message here..."/><button class="offline-button">send</button>`;
 
         chatMessagesCtr.appendChild(offlineEl);
         this.scrollToBottomOfChat();
@@ -378,9 +375,14 @@ class Visitor {
     }
 
     onOnline() {
+        console.log("online..");
         this.removeOfflineForm();
         document.getElementById("onoffindicatoroff").id = "onoffindicatoron";
         localStorage.setItem("iodisconnected", false);
+
+        document.querySelector('#messageInput').style.display = 'block';
+        document.querySelector('#triggerpickerbtn').style.display = 'block';
+        document.querySelector('#rating').style.display = 'block';
     }
 
     onOffline() {
@@ -392,6 +394,10 @@ class Visitor {
             document.getElementById("onoffindicatoron").id = "onoffindicatoroff";
         }
         localStorage.setItem("iodisconnected", true);
+
+        document.querySelector('#messageInput').style.display = 'none';
+        document.querySelector('#triggerpickerbtn').style.display = 'none';
+        document.querySelector('#rating').style.display = 'none';
         
         if(SETTINGS.hideWidgetWhenOffline){ widget.style.display = 'none'; }
     }

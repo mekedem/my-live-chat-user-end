@@ -202,6 +202,7 @@ button:active {
 
 .offline-input{
   height: 40px;
+  margin-bottom: 3px;
 }
 
 .offline-name{
@@ -214,6 +215,12 @@ button:active {
 
 .offline-email{
   margin-bottom: 3px;
+}
+
+.offline-button{
+  width: 100%;
+  background-color: var(--main-color-dark);
+  color: var(--plain-white);
 }
 
 .ratingheaderp{
