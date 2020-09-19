@@ -7,17 +7,8 @@ const PROJECT_ID = '5f6276e57f237845109bbbff';
 
 const SETTINGS = {
     active: true,
-    waitTime: 0,
     soundNotification: false,
     browserTabNotification: false,
-    showAgentTyping: false,
-    showVisitorTyping: false,
-    sneakPreview: false,
-    hideWidgetWhenOffline: false,
-    hideWidgetOnMobile: false,
-    fileUploadAllowed: false,
-    chatRatingAllowed: false,
-    emojiInChatAllowed: false,
 };
 **/
 

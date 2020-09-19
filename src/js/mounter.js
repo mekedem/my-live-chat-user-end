@@ -102,12 +102,19 @@ function mountIndex() {
   let widgetimage = document.querySelector("#widgetimageicon");
 
   window.addEventListener("DOMContentLoaded", () => {
-    if (getCookie("conversationToken")) {
-      // window.location.href = 'chatlive.html';
-      // remove the immediate children in the body.
-      mountChatLive();
-    }
+    if (getCookie("conversationToken")) mountChatLive();
+    waitAndInitialize();
   });
+
+  function waitAndInitialize(){
+    let regxform = document.getElementById("register-container");
+    let widgetLauncher = document.getElementById("widgetimageicon");
+    
+    setTimeout(() => {
+        regxform.style.display = "block";
+        widgetLauncher.src=`${CHAT_ASSET_SERVER_URL}/images/smsinactiveicon.png`;
+    },SETTINGS.waitTime);
+  }
 
   registerform.onsubmit = (ev) => {
     ev.preventDefault();

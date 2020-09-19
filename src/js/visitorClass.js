@@ -6,6 +6,7 @@ import { isEmail, isFullName, isNonEmptyString } from './validator';
 class Visitor {
     constructor() {
         this.room = null;
+        this.enforceProjectSettings();
         this.insureBrowserID();
         this.fetchHistoryIfPossible();
         setTimeout(() => {
@@ -13,6 +14,13 @@ class Visitor {
         }, 1000);
         this.notificationcount = 0;
         this.projectID = PROJECT_ID;
+    }
+
+    enforceProjectSettings(){
+        if(SETTINGS.hideWidgetOnMobile){}
+        if(SETTINGS.fileUploadAllowed){}
+        if(!SETTINGS.chatRatingAllowed){document.getElementById('rating').style.display = 'none'}
+        if(!SETTINGS.emojiInChatAllowed){document.getElementById('triggerpickerbtn').style.display = 'none';}
     }
 
     insureBrowserID() {
@@ -110,10 +118,13 @@ class Visitor {
         });
 
         document.querySelector('#messageInput').addEventListener('input', (e) => {
-            this.visitorTyping(e.target.value, false);
-            setTimeout(() => {
-                this.visitorTyping(e.target.value, true);
-            }, 1000);
+            if(SETTINGS.showVisitorTyping) this.visitorTyping(e.target.value, false);
+            if(SETTINGS.sneakPreview){
+                setTimeout(() => {
+                    this.visitorTyping(e.target.value, true);
+                },1000);
+            }
+            else { return }
         });
     }
 
@@ -374,11 +385,15 @@ class Visitor {
 
     onOffline() {
         let icon = document.getElementById("onoffindicatoron");
+        let widget = document.getElementById("chat-container");
+
         this.offlineFormDisplay();
         if (icon) {
             document.getElementById("onoffindicatoron").id = "onoffindicatoroff";
         }
         localStorage.setItem("iodisconnected", true);
+        
+        if(SETTINGS.hideWidgetWhenOffline){ widget.style.display = 'none'; }
     }
 
     onConnect() {
