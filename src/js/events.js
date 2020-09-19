@@ -19,17 +19,4 @@ const E = {
     SNEAKPREVIEW: 'SNEAKPREVIEW'
 };
 
-const SETTINGS = {
-    active: true,
-    waitTime: 2000,
-    soundNotification: false,
-    browserTabNotification: false,
-    showAgentTyping: false,
-    showVisitorTyping: true,
-    sneakPreview: true,
-    hideWidgetWhenOffline: false,
-    hideWidgetOnMobile: false,
-    fileUploadAllowed: false,
-    chatRatingAllowed: true,
-    emojiInChatAllowed: true,
-};
+export default E;

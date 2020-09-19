@@ -362,7 +362,7 @@ button:active {
 /*-----------------------start of register page --------------------*/
 
 .register-container{
-    height: 80%;
+    height: 76%;
     width: 26%;
     color: black;
     background-color: var(--plain-white);
@@ -371,6 +371,10 @@ button:active {
     border-radius: 16px;
     box-shadow: 0px 4px 0px 0px rgba(0, 0, 0, 0.2);
     display: none;
+    flex-wrap: wrap;
+    position: absolute;
+    bottom: 13%;
+    right: 36%;
 }
 
 .register-main{

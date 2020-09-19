@@ -1,60 +1,46 @@
-class Visitor {
+import io from './socket.io';
+import E from './events';
+import { isEmail, isFullName, isNonEmptyString } from './validator';
+// import { PROJECT_ID, SETTINGS } from './constants';
 
-    constructor(agency) {
+class Visitor {
+    constructor() {
         this.room = null;
-        this.enforceProjectSettings();
         this.insureBrowserID();
         this.fetchHistoryIfPossible();
         setTimeout(() => {
             this.setupSocket();
         }, 1000);
         this.notificationcount = 0;
-        this.projectID = '5f6276e57f237845109bbbff';
-    }
-
-    enforceProjectSettings(){
-    if(SETTINGS.hideWidgetOnMobile){
-        //if moblie hide widget i don't know what to hide exactly
-    }
-    if(SETTINGS.fileUploadAllowed){
-        // do some hiding here also
-    }
-    if(!SETTINGS.chatRatingAllowed){document.getElementById('rating').style.display = 'display'}
-    if(!SETTINGS.emojiInChatAllowed){document.getElementById('triggerpickerbtn').style.display = 'none';}
+        this.projectID = PROJECT_ID;
     }
 
     insureBrowserID() {
         if (!localStorage.getItem("browserID")) {
-            const id = Math.random(); // change this to generateUUID()
+            // change this to a more unique id (ex: use UUID)
+            const id = Math.random();
             localStorage.setItem("browserID", `${id}`);
-            
         } else {
             console.log('got a browserID');
         }
     }
 
-    generateUUID(){
-        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => 
-            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
-    }
-
-    fetchHistoryIfPossible(){
+    fetchHistoryIfPossible() {
         const token = this.getCookie('conversationToken');
-        if(token){
-        const requestOptions = {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: token,
-              getTheLast: "2",
-              fetchedHistoryCount:"0"
-            }
-          };
-          
-        fetch(`http://localhost:5000/visitor/history`,requestOptions)
+        if (token) {
+            const requestOptions = {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: token,
+                    fetchedHistoryCount: "0"
+                }
+            };
+
+            fetch(`http://localhost:5000/visitor/history`, requestOptions)
                 .then(response => response.json())
                 .then(data => {
-                    if(data.success){
+                    if (data.success) {
                         const temp = data.data.history;
                         for (let j = 0; j < temp.length; j++) {
                             if (temp[j].sender.agent) {
@@ -101,8 +87,8 @@ class Visitor {
 
         let notification = document.querySelector("#notification"); // notification item on dropdown
         let ratingConv = document.querySelector("#rating"); // rating item on dropdown
-        
-        sendMessageForm.onsubmit = (ev) => { 
+
+        sendMessageForm.onsubmit = (ev) => {
             ev.preventDefault();
             this.onSend();
         }
@@ -110,27 +96,24 @@ class Visitor {
         customwidget.onclick = () => this.onToggleWidget();
         notification.onclick = () => this.onNotification();
         ratingConv.onclick = () => this.onConversationRating();
-        
+
         document.querySelector("#chatMessages").addEventListener('click', (e) => {
-            if(e.target.className == 'goodrating' || e.target.className == 'likebutton') { this.onAfterRating(true); }
-            else if(e.target.className == 'badrating' || e.target.className == 'dislikebutton'){ this.onAfterRating(false); }
+            if (e.target.className == 'goodrating' || e.target.className == 'likebutton') { this.onAfterRating(true); }
+            else if (e.target.className == 'badrating' || e.target.className == 'dislikebutton') { this.onAfterRating(false); }
             else { return }
         });
 
         document.querySelector('#chatMessages').addEventListener('keypress', (e) => {
-            if(e.target.className == 'offline-input' || e.target.className == 'offline-name' || e.target.className == 'offline-subject' || e.target.className == 'offline-email'){
-                if(e.key === 'Enter'){ this.onSubmitOfflineMessage(); }
+            if (e.target.className == 'offline-input' || e.target.className == 'offline-name' || e.target.className == 'offline-subject' || e.target.className == 'offline-email') {
+                if (e.key === 'Enter') { this.onSubmitOfflineMessage(); }
             }
         });
 
-        document.querySelector('#messageInput').addEventListener('input', (e) => { 
-            if(SETTINGS.showVisitorTyping) this.visitorTyping(e.target.value, false);
-            if(SETTINGS.sneakPreview){
-                setTimeout(() => {
-                    this.visitorTyping(e.target.value, true);
-                },1000);
-            }
-            else { return }
+        document.querySelector('#messageInput').addEventListener('input', (e) => {
+            this.visitorTyping(e.target.value, false);
+            setTimeout(() => {
+                this.visitorTyping(e.target.value, true);
+            }, 1000);
         });
     }
 
@@ -140,20 +123,20 @@ class Visitor {
 
         messageEl.className = `message message-${incomming ? "from" : "to"}`;
         messageEl.innerHTML = `<p class="message-text">${text}</p>`;
-        
+
         chatMessagesCtr.appendChild(messageEl);
-        chatMessagesCtr.scrollTop = chatMessagesCtr.scrollHeight - chatMessagesCtr.clientHeight;
+        this.scrollToBottomOfChat();
     }
 
     // display the conversation form
-    onConversationRating(){
+    onConversationRating() {
         const noioconnection = JSON.parse(localStorage.getItem("iodisconnected"));
         let chatMessagesCtr = document.querySelector("#chatMessages");
         let checkelet = document.querySelector(".goodrating");
         let rmelet = document.getElementsByClassName("message-rating")[0];
-        
-        if(noioconnection) return;
-        if(checkelet){
+
+        if (noioconnection) return;
+        if (checkelet) {
             rmelet.parentNode.removeChild(rmelet); //if rating again remove previous one
         }
 
@@ -169,75 +152,77 @@ class Visitor {
 
         ratingdown.className = `badrating`;
         ratingdown.innerHTML = `<p class="dislikebutton"> &#128078; </p>`;
-        
+
         ratingEl.appendChild(ratingup);
         ratingEl.appendChild(ratingdown);
 
         chatMessagesCtr.appendChild(ratingEl);
-        chatMessagesCtr.scrollTop = chatMessagesCtr.scrollHeight - chatMessagesCtr.clientHeight;  
+        this.scrollToBottomOfChat();
     }
 
     // after visitor rates the conversation
-    onAfterRating(liked){
+    onAfterRating(liked) {
         let comment = document.querySelector(".rating-input");
         // do sth here like sending the conversation rating with the comment
-        if(liked){
+        if (liked) {
             this.appendMessage("Yes, VeryGood!", false);
         }
-        else{
+        else {
             this.appendMessage("No, Poor", false);
         }
     }
 
-    async onSubmitOfflineMessage(){
+    async onSubmitOfflineMessage() {
         let offline_email = document.querySelector('.offline-email').value;
         let offline_input = document.querySelector('.offline-input').value;
         let offline_name = document.querySelector('.offline-name').value;
         let offline_subject = document.querySelector('.offline-subject').value;
 
-        const mail = { email: offline_email,
-                       name: offline_name,
-                       subject: offline_subject,
-                       text: offline_name
-                    }
+        const mail = {
+            email: offline_email,
+            name: offline_name,
+            subject: offline_subject,
+            text: offline_input
+        }
 
-        if(offline_email && offline_input && offline_name && offline_subject){
+        if (isEmail(offline_email) && isNonEmptyString(offline_input) && isFullName(offline_name) && isNonEmptyString(offline_subject)) {
             const requestOptions = {
                 method: "POST",
-                headers: { "Content-Type": "application/json"},
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(mail),
-              };
-            
-              let response = await fetch(`http://localhost:5000/visitor/${this.projectID}/offlineMessage`, requestOptions);
+            };
+
+            let response = await fetch(`http://localhost:5000/visitor/${this.projectID}/offlineMessage`, requestOptions);
             // console.log(response);
-                if (response.ok) {
+            if (response.ok) {
                 this.disableOfflineMessage();
+                console.log("disable now");
                 // return response.json();
-              } else {
+            } else {
                 throw new Error("something went wrong on sending email!!");
-              }
+            }
         }
     }
 
-    offlineFormDisplay(){
+    offlineFormDisplay() {
         let chatMessagesCtr = document.querySelector("#chatMessages");
         const offlineEl = document.createElement("div");
 
         offlineEl.className = `message message-offline`;
-        offlineEl.innerHTML = `<p class="ratingheaderp">We are offline now. we will reply via email please leave here your email and your message your email and your message </p><input type="text" class="offline-name" placeholder="Enter name here"/> <input type="email" class="offline-email" placeholder="email@example.com"/><input type="text" class="offline-subject" placeholder="Enter subject here"/> <input type="text" class="offline-input" placeholder="message here..."/>`;
+        offlineEl.innerHTML = `<p class="ratingheaderp">We are offline now. we will reply via email please leave here your email and your message your email and your message </p><input type="text" class="offline-name" placeholder="Jhon doe"/> <input type="email" class="offline-email" placeholder="email@example.com"/><input type="text" class="offline-subject" placeholder="Enter subject here"/> <input type="text" class="offline-input" placeholder="your message here..."/>`;
 
         chatMessagesCtr.appendChild(offlineEl);
-        chatMessagesCtr.scrollTop = chatMessagesCtr.scrollHeight - chatMessagesCtr.clientHeight;
+        this.scrollToBottomOfChat();
     }
 
-    removeOfflineForm(){
+    removeOfflineForm() {
         let rmform = document.getElementsByClassName("message-offline")[0];
-        if(rmform){
+        if (rmform) {
             rmform.parentNode.removeChild(rmform);
         }
     }
 
-    disableOfflineMessage(){
+    disableOfflineMessage() {
         document.querySelector(".offline-email").disabled = true;
         document.querySelector(".offline-name").disabled = true;
         document.querySelector(".offline-subject").disabled = true;
@@ -245,62 +230,67 @@ class Visitor {
     }
 
     // for the launcher button if you want to display the chat or minimize
-    onToggleWidget(){
+    onToggleWidget() {
         let x = document.getElementById("chat-container");
         let y = document.getElementById("widgetimageicon");
-        
+
         if (x.style.display === "none") {
             x.style.display = "flex";
-            y.src='./smsinactiveicon.png';
-
+            y.src = `${CHAT_ASSET_SERVER_URL}/images/smsinactiveicon.png`;
             this.countNotification();
+            this.scrollToBottomOfChat();
         }
-        else{
-            if(x.style.display === "flex"){
+        else {
+            if (x.style.display === "flex") {
                 x.style.display = "none";
-                y.src='./smsactiveicon.png';
+                y.src = `${CHAT_ASSET_SERVER_URL}/images/smsactiveicon.png`;
             }
-            else{
+            else {
                 x.style.display = "none";
-                y.src='./smsactiveicon.png';
+                y.src = `${CHAT_ASSET_SERVER_URL}/images/smsactiveicon.png`;
             }
         }
     }
 
+    scrollToBottomOfChat() {
+        let chatMessagesCtr = document.querySelector("#chatMessages");
+        chatMessagesCtr.scrollTop = chatMessagesCtr.scrollHeight - chatMessagesCtr.clientHeight;
+    }
+
     // for enabling and disabling notification option
-    onNotification(){
+    onNotification() {
         let getnotified = JSON.parse(localStorage.getItem("NotificationEnabled"));
         let enabledisabletext = document.querySelector("#enabledisable");
 
-        if(getnotified){
+        if (getnotified) {
             enabledisabletext.textContent = "Notification on";
-            localStorage.setItem("NotificationEnabled",false);
+            localStorage.setItem("NotificationEnabled", false);
         }
-        else{
+        else {
             enabledisabletext.textContent = "Notification off";
-            localStorage.setItem("NotificationEnabled",true);
+            localStorage.setItem("NotificationEnabled", true);
         }
     }
 
     // for the count increament and visibility on the badge
-    countNotification(){
+    countNotification() {
         let notifymebadge = document.getElementById("notificationbadge");
         let visiblityc = document.getElementById("chat-container");
         let option = JSON.parse(localStorage.getItem("NotificationEnabled"));
 
-        if(option){
-            if (visiblityc.style.display === "none"){
+        if (option) {
+            if (visiblityc.style.display === "none") {
                 notifymebadge.style.display = "block";
                 this.notificationcount = this.notificationcount + 1;
-                notifymebadge.innerHTML = this.notificationcount + "";   
+                notifymebadge.innerHTML = this.notificationcount + "";
             }
-            else{
+            else {
                 notifymebadge.style.display = "none";
                 this.notificationcount = 0;
-                notifymebadge.innerHTML = ""; 
+                notifymebadge.innerHTML = "";
             }
         }
-        else{
+        else {
             this.notificationcount = 0;
             notifymebadge.innerHTML = "";
             notifymebadge.style.display = "none";
@@ -312,7 +302,7 @@ class Visitor {
         let messageInput = document.querySelector("#messageInput");
         const noioconnection = JSON.parse(localStorage.getItem("iodisconnected"));
 
-        if(noioconnection) return;
+        if (noioconnection) return;
         if (!messageInput.value) return;
 
         const msg = { text: messageInput.value, time: Date.now() };
@@ -328,7 +318,7 @@ class Visitor {
     startConversation() {
         const visitoremail = localStorage.getItem("visitoremail");
         const token = this.getCookie('conversationToken');
-        if(token) return;
+        if (token) return;
         this.socket.emit(E.STARTCONVERSATION, { email: visitoremail });
     }
 
@@ -339,26 +329,23 @@ class Visitor {
     // -------------------- socket io handlers --------------------
     onMessage(msg) {
         //msg may also contain file: {mime, name, size, url}
-        if (msg.agentsOnly) {
-            // only seen to agents
-        }
-        if(msg.sender){
-            if(msg.sender.agent){
+        if (msg.sender) {
+            if (msg.sender.agent) {
                 this.appendMessage(msg.text, true);
                 this.countNotification();
             }
-            else if(msg.sender.visitor){
+            else if (msg.sender.visitor) {
                 this.appendMessage(msg.text, false);
             }
         }
     }
 
-    visitorTyping(message, ispreview){
+    visitorTyping(message, ispreview) {
         const preview = { text: message };
-        if(ispreview){
+        if (ispreview) {
             this.socket.emit(E.SNEAKPREVIEW, preview);
         }
-        else{
+        else {
             this.socket.emit(E.VISITORTYPING);
         }
     }
@@ -376,26 +363,26 @@ class Visitor {
 
     onToken(auth) {
         const { token } = auth;
-        this.setCookie("conversationToken",token,365);
+        this.setCookie("conversationToken", token, 365);
     }
 
-    onOnline(){
+    onOnline() {
         this.removeOfflineForm();
         document.getElementById("onoffindicatoroff").id = "onoffindicatoron";
+        localStorage.setItem("iodisconnected", false);
     }
 
     onOffline() {
-        // if (SETTINGS.hideWidgetWhenOffline){}
-
-        this.offlineFormDisplay();
         let icon = document.getElementById("onoffindicatoron");
-        if(icon){
+        this.offlineFormDisplay();
+        if (icon) {
             document.getElementById("onoffindicatoron").id = "onoffindicatoroff";
         }
+        localStorage.setItem("iodisconnected", true);
     }
 
     onConnect() {
-        localStorage.setItem("iodisconnected",false);
+        localStorage.setItem("iodisconnected", false);
         console.log("socket connected to server");
     }
 
@@ -404,7 +391,8 @@ class Visitor {
     }
 
     onDisconnect() {
-        localStorage.setItem("iodisconnected",true);
+        localStorage.setItem("iodisconnected", true);
+        console.log("iodisconnected");
     }
 
     onError(err) {
@@ -435,3 +423,5 @@ class Visitor {
         return "";
     }
 }
+
+export default Visitor;
