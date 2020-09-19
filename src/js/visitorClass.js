@@ -1,5 +1,6 @@
 import io from './socket.io';
 import E from './events';
+import { API_SERVER_URL, CHAT_SERVER_URL, CHAT_ASSET_SERVER_URL } from './constants';
 import { isEmail, isFullName, isNonEmptyString } from './validator';
 // import { PROJECT_ID, SETTINGS } from './constants';
 
@@ -37,7 +38,7 @@ class Visitor {
                 }
             };
 
-            fetch(`http://localhost:5000/visitor/history`, requestOptions)
+            fetch(`${API_SERVER_URL}/visitor/history`, requestOptions)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -67,7 +68,7 @@ class Visitor {
             projectID: this.projectID,
         };
 
-        this.socket = io('http://localhost:5000', { query: visitorQuery, forceNew: true });
+        this.socket = io(CHAT_SERVER_URL, { query: visitorQuery, forceNew: true });
         this.startConversation();
 
         this.socket.on(E.AGENTASSIGNED, this.onAgentssigned.bind(this));
@@ -192,7 +193,7 @@ class Visitor {
                 body: JSON.stringify(mail),
             };
 
-            let response = await fetch(`http://localhost:5000/visitor/${this.projectID}/offlineMessage`, requestOptions);
+            let response = await fetch(`${API_SERVER_URL}/visitor/${this.projectID}/offlineMessage`, requestOptions);
             // console.log(response);
             if (response.ok) {
                 this.disableOfflineMessage();

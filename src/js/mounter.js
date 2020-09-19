@@ -1,6 +1,6 @@
 import Visitor from './visitorClass';
 import EmojiButton from './emojiBtn';
-import CHAT_ASSET_SERVER_URL from './constants';
+import { CHAT_ASSET_SERVER_URL } from './constants';
 import { isEmail } from './validator';
 
 function addCssLink(link) {
