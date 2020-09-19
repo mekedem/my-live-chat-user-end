@@ -12,5 +12,8 @@ const SETTINGS = {
 };
 **/
 
-const CHAT_ASSET_SERVER_URL = 'http://localhost:5000';
-export default CHAT_ASSET_SERVER_URL;
+module.exports = {
+    API_SERVER_URL: 'http://localhost:5000',
+    CHAT_SERVER_URL: 'http://localhost:5000',
+    CHAT_ASSET_SERVER_URL: 'http://localhost:5000',
+};
