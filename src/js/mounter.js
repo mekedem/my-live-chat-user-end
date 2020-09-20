@@ -188,5 +188,3 @@ function getCookie(cname) {
   }
   return "";
 }
-
-mountIndex();
