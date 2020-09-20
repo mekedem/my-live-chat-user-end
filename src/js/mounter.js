@@ -102,6 +102,7 @@ function mountIndex() {
   let widgetimage = document.querySelector("#widgetimageicon");
 
   window.addEventListener("DOMContentLoaded", () => {
+    new Visitor();
     if (getCookie("conversationToken")) mountChatLive();
     waitAndInitialize();
   });
@@ -154,7 +155,6 @@ function mountChatLive() {
   let enabledisabletext = document.querySelector("#enabledisable");
   if (notified) { enabledisabletext.textContent = "Notification off" }
   else { enabledisabletext.textContent = "Notification on" }
-  new Visitor();
 
   let messageInput = document.querySelector("#messageInput");
   let triggerbutton = document.querySelector("#triggerpickerbtn");
