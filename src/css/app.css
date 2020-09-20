@@ -202,19 +202,24 @@ button:active {
 
 .offline-input{
   height: 40px;
-  margin-bottom: 3px;
+  border-radius: 4px;
+  margin-bottom: 6px;
 }
 
 .offline-name{
-  margin-bottom: 3px;
+  border-radius: 4px;
+  margin-top: 6px;
+  margin-bottom: 6px;
 }
 
 .offline-subject{
-  margin-bottom: 3px;
+  border-radius: 4px;
+  margin-bottom: 6px;
 }
 
 .offline-email{
-  margin-bottom: 3px;
+  border-radius: 4px;
+  margin-bottom: 6px;
 }
 
 .offline-button{
