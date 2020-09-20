@@ -1,7 +1,7 @@
 import Visitor from './visitorClass';
 import EmojiButton from './emojiBtn';
 import { CHAT_ASSET_SERVER_URL } from './constants';
-import { isEmail } from './validator';
+import { isEmail, isNonEmptyString } from './validator';
 
 function addCssLink(link) {
   const cssLink = document.createElement('link');
@@ -91,9 +91,24 @@ const chatLiveHTML = `
   </div>
 `;
 
+// add both htmls
+mountPoint.innerHTML = indexHTML;
+mountPoint.innerHTML += chatLiveHTML;
+
+const visitor = new Visitor();
+
+window.addEventListener("DOMContentLoaded", () => {
+  if (getCookie("conversationToken")) {
+    mountChatLive(false);
+  } else {
+    mountIndex();
+  }
+});
+
 function mountIndex() {
-  // mounting in directly as the document body. this will have to change.
-  mountPoint.innerHTML = indexHTML;
+  // show register, hide chat-container.
+  document.querySelector('#register-container').style.display = 'block';
+  document.querySelector('#chat-container').style.display = 'none';
   // ----------------------------------- mekedeme's code starts here --------------------------------
   let registerform = document.querySelector("#register-main");
   let visitoremail = document.querySelector("#visitoremailinput");
@@ -101,20 +116,9 @@ function mountIndex() {
   let widgetfab = document.querySelector("#widgetcontainerbox");
   let widgetimage = document.querySelector("#widgetimageicon");
 
-  window.addEventListener("DOMContentLoaded", () => {
-    if (getCookie("conversationToken")) mountChatLive();
-    waitAndInitialize();
-  });
+  let widgetLauncher = document.getElementById("widgetimageicon");
+  widgetLauncher.src = `${CHAT_ASSET_SERVER_URL}/images/smsinactiveicon.png`;
 
-  function waitAndInitialize(){
-    let regxform = document.getElementById("register-container");
-    let widgetLauncher = document.getElementById("widgetimageicon");
-    
-    setTimeout(() => {
-        regxform.style.display = "block";
-        widgetLauncher.src=`${CHAT_ASSET_SERVER_URL}/images/smsinactiveicon.png`;
-    },SETTINGS.waitTime);
-  }
 
   registerform.onsubmit = (ev) => {
     ev.preventDefault();
@@ -122,7 +126,7 @@ function mountIndex() {
       return;
     }
     localStorage.setItem("visitoremail", visitoremail.value);
-    mountChatLive();
+    mountChatLive(true);
   };
 
   widgetfab.onclick = () => {
@@ -146,15 +150,16 @@ function mountIndex() {
   }
 }
 
-function mountChatLive() {
+function mountChatLive(veryFirstTime) {
   // mounting in directly as the document body. this will have to change.
-  mountPoint.innerHTML = chatLiveHTML;
+  // show register, hide chat-container.
+  document.querySelector('#register-container').style.display = 'none';
+  document.querySelector('#chat-container').style.display = 'block';
 
   let notified = JSON.parse(localStorage.getItem("NotificationEnabled"));
   let enabledisabletext = document.querySelector("#enabledisable");
   if (notified) { enabledisabletext.textContent = "Notification off" }
   else { enabledisabletext.textContent = "Notification on" }
-  new Visitor();
 
   let messageInput = document.querySelector("#messageInput");
   let triggerbutton = document.querySelector("#triggerpickerbtn");
@@ -162,6 +167,10 @@ function mountChatLive() {
   picker.on('emoji', function (emoji) { messageInput.value += emoji; });
   triggerbutton.addEventListener('click', function () { picker.pickerVisible ? picker.hidePicker() : picker.showPicker(messageInput); });
 
+  // must be after mountChatLive because the dom elements will not exist before mounting.
+  visitor.setupDomListeners();
+  if (veryFirstTime) visitor.startConversation();
+  visitor.fetchHistoryIfPossible();
 }
 
 function getCookie(cname) {
