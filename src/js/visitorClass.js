@@ -237,6 +237,7 @@ class Visitor {
         document.querySelector(".offline-name").disabled = true;
         document.querySelector(".offline-subject").disabled = true;
         document.querySelector(".offline-input").disabled = true;
+        document.querySelector(".offline-button").disabled = true;
     }
 
     // for the launcher button if you want to display the chat or minimize
