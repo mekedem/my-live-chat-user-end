@@ -83,7 +83,7 @@ button:active {
   box-shadow: 0px 2px 0px 0px rgba(0, 0, 0, 0.2);
   position: absolute;
   bottom: 17%;
-  right: 36%;
+  right: 8%;
 }
 
 .chat-header, .chat-sidebar {
@@ -298,7 +298,7 @@ button:active {
 #widgetcontainerbox{
   position: absolute;
   bottom: 5%;
-  right: 36%;
+  right: 8%;
 }
 
 #customwidget{
@@ -396,7 +396,7 @@ button:active {
     flex-wrap: wrap;
     position: absolute;
     bottom: 13%;
-    right: 36%;
+    right: 8%;
 }
 
 .register-main{
