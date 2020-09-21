@@ -52,7 +52,7 @@ const chatLiveHTML = `
         <img id="avatar_img" src="${CHAT_ASSET_SERVER_URL}/images/avatar.png" alt="Avatar" class="avatar">
         <div id="agentName" class="group-name">
           <span id="agent_Name">Hi there</span>
-          <span id="onoffindicatoroff">o</span>
+          <span id="onoffindicatoroff"></span>
         </div>
         <div>
           <div class="widgetdropdown" style="float:right;">
@@ -81,7 +81,7 @@ const chatLiveHTML = `
   <div id="widgetcontainerbox">
     <div id="customwidget">
       <img id="widgetimageicon" src="${CHAT_ASSET_SERVER_URL}/images/smsinactiveicon.png"/>
-      <span id="notificationbadge"> 2 </span> 
+      <span id="notificationbadge"> </span> 
     </div>
   </div>
 `;
@@ -125,6 +125,9 @@ function mountIndex() {
   };
 
   widgetfab.onclick = () => {
+    if(localStorage.getItem("visitoremail")) return;
+    if (getCookie("conversationToken")) return;
+
     let x = document.getElementById("register-container");
     let y = document.getElementById("widgetimageicon");
 

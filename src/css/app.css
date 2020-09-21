@@ -28,23 +28,41 @@ body {
   margin-bottom: 20px;
 }
 
-input[type='text'],[type='email'] {
+#register-container input[type='text'],[type='email'] {
   outline: 0;
   display: block;
   width: 100%;
-  padding: 6px 10px;
-  border: 2px solid rgb(209, 209, 209);
+  padding: 10px;
+  border: 1px solid rgb(209, 209, 209);
+  border-radius: 5px;  
   transition: all 0.3s;
 }
 
-input[type='text']:focus,input[type='email'] {
-  border: 2px solid rgb(184, 184, 184);
+#register-container input[type='text']:focus,input[type='email'] {
+  border: 1px solid rgb(184, 184, 184);
+}
+
+#chat-container input[type='text'],[type='email'] {
+  outline: 0;
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgb(209, 209, 209);
+  border-radius: 5px;  
+  transition: all 0.3s;
+}
+
+#chat-container input[type='text']:focus,input[type='email'] {
+  border: 1px solid rgb(184, 184, 184);
 }
 
 button {
   outline: 0;
   padding: 6px 10px;
   background-color: var(--main-button-default);
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
 }
 
 button:active {
@@ -73,14 +91,12 @@ button:active {
 }
 
 #onoffindicatoron{
-  background-color: green;
+  background-color: #33ff0e;
   border-radius: 50%;
   display: inline-block;
-  color: #460;
+  color: #33ff0e;
   width: 12px;
   height: 12px;
-  margin-top: 5px;
-  box-shadow: #000 0 -1px 7px 1px, inset #460 0 -1px 9px, #7D0 0 2px 12px;
 }
 
 #onoffindicatoroff{
@@ -95,8 +111,9 @@ button:active {
 }
 
 #agentName{
-  margin-top: 5px;
-}
+  display: flex;
+    align-items: center;
+    gap: 10px;}
 
 .chat-header {
   display: flex;
@@ -153,17 +170,17 @@ button:active {
 }
 
 .chat-messages::-webkit-scrollbar {
-  width: 10px;
+  width: 7px;
 }
 
 .chat-messages::-webkit-scrollbar-track {
   box-shadow: inset 0 0 0px grey; 
-  border-radius: 10px;
+  border-radius: 7px;
 }
 
 .chat-messages::-webkit-scrollbar-thumb {
   background: var(--lighter-grey); 
-  border-radius: 10px;
+  border-radius: 7px;
 }
 
 .chat-messages .message {
@@ -202,30 +219,18 @@ button:active {
 
 .offline-input{
   height: 40px;
-  border-radius: 4px;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
-.offline-name{
-  border-radius: 4px;
-  margin-top: 6px;
-  margin-bottom: 6px;
-}
-
-.offline-subject{
-  border-radius: 4px;
-  margin-bottom: 6px;
-}
-
-.offline-email{
-  border-radius: 4px;
-  margin-bottom: 6px;
+.offline-name, .offline-subject, .offline-email{
+  margin-bottom: 10px;
 }
 
 .offline-button{
   width: 100%;
   background-color: var(--main-color-dark);
   color: var(--plain-white);
+  padding: 10px;
 }
 
 .ratingheaderp{
@@ -233,6 +238,7 @@ button:active {
   text-align: center;
   font-weight: 600;
   padding: 3px;
+  padding-bottom: 10px;
 }
 
 .chat-messages .message.message-rating {
@@ -242,25 +248,26 @@ button:active {
   border-radius: 8px 8px 8px 0px;
 }
 
-.goodrating{
+  
+
+
+.goodrating, .badrating{
   background-color: var(--main-background-color);
   margin-top: 5px;
   padding-left: 10px;
   padding-right: 10px;
   width: 100px;
-  margin-right: 4px;
   border: none;
   box-shadow: 1px 1px 1px 1px var(--lighter-grey);
 }
 
-.badrating{
-  background-color: var(--main-background-color);
-  margin-top: 5px;
-  padding-left: 10px;
-  padding-right: 10px;
-  width: 100px;
-  border: none;
-  box-shadow: 1px 1px 1px 1px var(--lighter-grey);
+.goodrating{
+  margin-right: 10px;
+
+}
+
+.rating-input{
+  margin-bottom: 10px;
 }
 
 /*----------------- chat footer start and the input form------------------------ */
@@ -347,6 +354,8 @@ button:active {
   min-width: 250px;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   z-index: 1;
+  border-radius: 5px;
+  overflow: hidden;
 }
 
 .widgetdropdown-content .widgetdropdown-item {
@@ -354,7 +363,8 @@ button:active {
   padding: 10px;
   text-decoration: none;
   display: block;
-  border-bottom: 1px solid #cccccc;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
 }
 
 .widgetdropdown-item img{
