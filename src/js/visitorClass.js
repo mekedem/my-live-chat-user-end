@@ -7,9 +7,7 @@ import { isEmail, isFullName, isNonEmptyString } from './validator';
 class Visitor {
     constructor() {
         this.room = null;
-        this.enforceProjectSettings();
         this.insureBrowserID();
-        this.fetchHistoryIfPossible();
         setTimeout(() => {
             this.setupSocket();
         }, 1000);
@@ -17,11 +15,11 @@ class Visitor {
         this.projectID = PROJECT_ID;
     }
 
-    enforceProjectSettings(){
-        if(SETTINGS.hideWidgetOnMobile){}
-        if(SETTINGS.fileUploadAllowed){}
-        if(!SETTINGS.chatRatingAllowed){document.getElementById('rating').style.display = 'none'}
-        if(!SETTINGS.emojiInChatAllowed){document.getElementById('triggerpickerbtn').style.display = 'none';}
+    enforceProjectSettings() {
+        if (SETTINGS.hideWidgetOnMobile) { }
+        if (SETTINGS.fileUploadAllowed) { }
+        if (!SETTINGS.chatRatingAllowed) { document.getElementById('rating').style.display = 'none' }
+        if (!SETTINGS.emojiInChatAllowed) { document.getElementById('triggerpickerbtn').style.display = 'none'; }
     }
 
     insureBrowserID() {
@@ -77,7 +75,6 @@ class Visitor {
         };
 
         this.socket = io(CHAT_SERVER_URL, { query: visitorQuery, forceNew: true });
-        this.startConversation();
 
         this.socket.on(E.AGENTASSIGNED, this.onAgentssigned.bind(this));
         this.socket.on(E.AGENTLEFT, this.onAgentLeft.bind(this));
@@ -89,7 +86,9 @@ class Visitor {
         // reserved event names.
         this.socket.on('connect', this.onConnect.bind(this));
         this.socket.on('error', this.onError.bind(this));
+    }
 
+    setupDomListeners() {
         //dom variables
         let sendMessageForm = document.querySelector("#messageSendForm");
         let customwidget = document.querySelector("#customwidget");  //launcher button to show & hide chat
@@ -109,19 +108,21 @@ class Visitor {
         document.querySelector("#chatMessages").addEventListener('click', (e) => {
             if (e.target.className == 'goodrating' || e.target.className == 'likebutton') { this.onAfterRating(true); }
             else if (e.target.className == 'badrating' || e.target.className == 'dislikebutton') { this.onAfterRating(false); }
-            else if (e.target.className == 'offline-button'){ this.onSubmitOfflineMessage(); }
+            else if (e.target.className == 'offline-button') { this.onSubmitOfflineMessage(); }
             else { return }
         });
 
         document.querySelector('#messageInput').addEventListener('input', (e) => {
             if (SETTINGS.showVisitorTyping) this.visitorTyping(e.target.value, false);
-            if (SETTINGS.sneakPreview){
+            if (SETTINGS.sneakPreview) {
                 setTimeout(() => {
                     this.visitorTyping(e.target.value, true);
-                },1000);
+                }, 1000);
             }
             else { return }
         });
+
+        this.enforceProjectSettings();
     }
 
     appendMessage(text, incomming) {
@@ -212,7 +213,7 @@ class Visitor {
     }
 
     offlineFormDisplay() {
-        if(document.querySelector('#message-offline')) return;
+        if (document.querySelector('#message-offline')) return;
         let chatMessagesCtr = document.querySelector("#chatMessages");
         const offlineEl = document.createElement("div");
 
@@ -399,8 +400,8 @@ class Visitor {
         document.querySelector('#messageInput').style.display = 'none';
         document.querySelector('#triggerpickerbtn').style.display = 'none';
         document.querySelector('#rating').style.display = 'none';
-        
-        if(SETTINGS.hideWidgetWhenOffline){ widget.style.display = 'none'; }
+
+        if (SETTINGS.hideWidgetWhenOffline) { widget.style.display = 'none'; }
     }
 
     onConnect() {
