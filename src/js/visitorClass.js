@@ -373,6 +373,11 @@ class Visitor {
 
     onToken(auth) {
         const { token } = auth;
+        const regform = document.querySelector('#register-container');
+        
+        if(regform) regform.style.display = 'none';
+        document.querySelector('#chat-container').style.display = 'block';
+
         this.setCookie("conversationToken", token, 365);
     }
 
