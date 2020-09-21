@@ -43,11 +43,6 @@ const indexHTML = `
         <button type="submit"> START </button>
     </form>
 </div>
-<div id="widgetcontainerbox">
-    <div id="customwidget">
-      <img id="widgetimageicon" src="${CHAT_ASSET_SERVER_URL}/images/smsactiveicon.png"/>
-    </div>
-</div>
 `;
 
 const chatLiveHTML = `
