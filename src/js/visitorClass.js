@@ -173,10 +173,16 @@ class Visitor {
         let comment = document.querySelector(".rating-input");
         // do sth here like sending the conversation rating with the comment
         if (liked) {
-            this.appendMessage("Yes, VeryGood!", false);
+            this.socket.emit(E.RATECHAT, { rating: 1 }, (err) => {
+                if (err) console.log(err);
+                else this.appendMessage("Yes, VeryGood!", false);
+            });
         }
         else {
-            this.appendMessage("No, Poor", false);
+            this.socket.emit(E.RATECHAT, { rating: -1 }, (err) => {
+                if (err) console.log(err);
+                else this.appendMessage("No, Poor", false);
+            });
         }
     }
 
@@ -244,12 +250,14 @@ class Visitor {
     onToggleWidget() {
         let x = document.getElementById("chat-container");
         let y = document.getElementById("widgetimageicon");
+        let msgemitseen = localStorage.getItem("LSTMSGID");
 
         if (x.style.display === "none") {
             x.style.display = "flex";
             y.src = `${CHAT_ASSET_SERVER_URL}/images/smsinactiveicon.png`;
             this.countNotification();
             this.scrollToBottomOfChat();
+            if (msgemitseen) this.socket.emit(E.MESSAGESEEN, { messageID: msgemitseen });
         }
         else {
             if (x.style.display === "flex") {
@@ -317,9 +325,13 @@ class Visitor {
         if (!messageInput.value) return;
 
         const msg = { text: messageInput.value, time: Date.now() };
-        this.socket.emit(E.MESSAGE, msg);
-        this.appendMessage(messageInput.value, false);
-        messageInput.value = "";
+        this.socket.emit(E.MESSAGE, msg, (err, result) => {
+            if (err) console.log(err);
+            else {
+                this.appendMessage(messageInput.value, false);
+                messageInput.value = "";
+            }
+        });
     }
 
     leaveChat() {
@@ -330,7 +342,9 @@ class Visitor {
         const visitoremail = localStorage.getItem("visitoremail");
         const token = this.getCookie('conversationToken');
         if (token) return;
-        this.socket.emit(E.STARTCONVERSATION, { email: visitoremail });
+        this.socket.emit(E.STARTCONVERSATION, { email: visitoremail }, (err) => {
+            if (err) console.log(err);
+        });
     }
 
     closeConnection() {
@@ -340,10 +354,13 @@ class Visitor {
     // -------------------- socket io handlers --------------------
     onMessage(msg) {
         //msg may also contain file: {mime, name, size, url}
+        let chatscreen = document.getElementById("chat-container").style.display;
         if (msg.sender) {
             if (msg.sender.agent) {
                 this.appendMessage(msg.text, true);
                 this.countNotification();
+                if (chatscreen == "flex") this.socket.emit(E.MESSAGESEEN, { messageID: msg.messageID });
+                else localStorage.setItem("LSTMSGID", msg.messageID);
             }
             else if (msg.sender.visitor) {
                 this.appendMessage(msg.text, false);
