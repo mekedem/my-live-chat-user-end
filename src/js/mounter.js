@@ -93,7 +93,7 @@ mountPoint.innerHTML += chatLiveHTML;
 const visitor = new Visitor();
 
 window.addEventListener("DOMContentLoaded", () => {
-  if (getCookie("conversationToken")) {
+  if (localStorage.getItem("visitoremail")) {
     mountChatLive(false);
   } else {
     mountIndex();
@@ -126,7 +126,6 @@ function mountIndex() {
 
   widgetfab.onclick = () => {
     if(localStorage.getItem("visitoremail")) return;
-    if (getCookie("conversationToken")) return;
 
     let x = document.getElementById("register-container");
     let y = document.getElementById("widgetimageicon");
@@ -151,6 +150,7 @@ function mountIndex() {
 function mountChatLive(veryFirstTime) {
   // mounting in directly as the document body. this will have to change.
   // show register, hide chat-container.
+
   document.querySelector('#register-container').style.display = 'none';
   document.querySelector('#chat-container').style.display = 'block';
 
@@ -167,22 +167,8 @@ function mountChatLive(veryFirstTime) {
 
   // must be after mountChatLive because the dom elements will not exist before mounting.
   visitor.setupDomListeners();
-  if (veryFirstTime) visitor.startConversation();
-  visitor.fetchHistoryIfPossible();
-}
-
-function getCookie(cname) {
-  var name = cname + "=";
-  var decodedCookie = decodeURIComponent(document.cookie);
-  var ca = decodedCookie.split(';');
-  for (var i = 0; i < ca.length; i++) {
-    var c = ca[i];
-    while (c.charAt(0) == ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) == 0) {
-      return c.substring(name.length, c.length);
-    }
-  }
-  return "";
+  setTimeout(() => {
+    visitor.startConversation();
+}, 601);
+  
 }
