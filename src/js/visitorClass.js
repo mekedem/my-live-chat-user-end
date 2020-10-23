@@ -61,6 +61,7 @@ class Visitor {
         this.socket.on(E.ONLINE, this.onOnline.bind(this));
         this.socket.on(E.ACTIVECHATCLOSED, this.onChatClosed.bind(this));
         this.socket.on(E.STARTEDCONVERSATION, this.onConversationStarted.bind(this));
+        this.socket.on(E.MESSAGESDELETED, this.onDeleteMessage.bind(this));
 
         // reserved event names.
         this.socket.on('connect', this.onConnect.bind(this));
@@ -91,6 +92,16 @@ class Visitor {
             else { return }
         });
 
+        // add this to mounter inside the form
+        // <input id="FileInput" type="file" style="cursor: pointer;  display: none"/>
+        // <label for="FileInput" style="margin-top: 5px;">
+        //   <img src="${CHAT_ASSET_SERVER_URL}/images/attachfileicon.png" width="20px" height="20px" style="top: 30px; cursor: pointer;"/>
+        // </label>
+
+        // document.querySelector('#FileInput').addEventListener('change', (ev) => {
+        //     this.readAndLoadFile(ev);
+        // });
+
         document.querySelector('#messageInput').addEventListener('input', (e) => {
             if (SETTINGS.showVisitorTyping) this.visitorTyping(e.target.value, false);
             if (SETTINGS.sneakPreview) {
@@ -104,14 +115,21 @@ class Visitor {
         this.enforceProjectSettings();
     }
 
-    appendMessage(text, incomming) {
+    appendMessage(message, incomming, messageid) {
         let chatMessagesCtr = document.querySelector("#chatMessages");
         const messageEl = document.createElement("div");
 
-        messageEl.className = `message message-${incomming ? "from" : "to"}`;
-        messageEl.innerHTML = `<p class="message-text">${text}</p>`;
+        if(message.type == "text"){
+            messageEl.className = `message message-${incomming ? "from" : "to"}`;
+            if(messageid) messageEl.id = `message-${messageid}`;
+            messageEl.innerHTML = `<p class="message-text">${message.text}</p>`;
 
-        chatMessagesCtr.appendChild(messageEl);
+            chatMessagesCtr.appendChild(messageEl);
+        }
+        else if(message.type == "file"){
+            // console.log(message.file);
+        }
+
         this.scrollToBottomOfChat();
     }
 
@@ -149,18 +167,18 @@ class Visitor {
 
     // after visitor rates the conversation
     onAfterRating(liked) {
-        let comment = document.querySelector(".rating-input");
+        // let comment = document.querySelector(".rating-input");
         // do sth here like sending the conversation rating with the comment
         if (liked) {
             this.socket.emit(E.RATECHAT, { rating: 1 }, (err) => {
                 if (err) console.log(err);
-                else this.appendMessage("Yes, VeryGood!", false);
+                else this.appendMessage({type:"text",text:"Yes, VeryGood!"}, false, '');
             });
         }
         else {
             this.socket.emit(E.RATECHAT, { rating: -1 }, (err) => {
                 if (err) console.log(err);
-                else this.appendMessage("No, Poor", false);
+                else this.appendMessage({type:"text",text:"No, Poor"}, false, '');
             });
         }
     }
@@ -296,21 +314,32 @@ class Visitor {
     }
 
     // when visitor sends message
-    onSend() {
+    onSend(fileInfo) {
         let messageInput = document.querySelector("#messageInput");
         const noioconnection = JSON.parse(localStorage.getItem("iodisconnected"));
 
         if (noioconnection) return;
-        if (!messageInput.value) return;
-
-        const msg = { text: messageInput.value, time: Date.now() };
-        this.socket.emit(E.MESSAGE, msg, (err, result) => {
+        if (messageInput.value){
+            const msg = { text: messageInput.value, time: Date.now() };
+            this.socket.emit(E.MESSAGE, msg, (err, result) => {
             if (err) console.log(err);
             else {
-                this.appendMessage(messageInput.value, false);
+                this.appendMessage({type:"text",text:messageInput.value}, false, result.messageID);
                 messageInput.value = "";
             }
-        });
+            });
+        }
+        // if(fileInfo){
+        //     console.log("file info ", fileInfo);
+        //     const msg = { file: fileInfo, time: Date.now() };
+        //     this.socket.emit(E.MESSAGE, msg, (err, result) => {
+        //     if (err) console.log(err);
+        //     else {
+        //         this.appendMessage({type:"file",file:fileInfo}, false, result.messageID);
+        //     }
+        //     });
+        // }
+
     }
 
     leaveChat() {
@@ -334,13 +363,13 @@ class Visitor {
         let chatscreen = document.getElementById("chat-container").style.display;
         if (msg.sender) {
             if (msg.sender.agent) {
-                this.appendMessage(msg.text, true);
+                this.appendMessage({type:"text", text:msg.text}, true, msg.messageID);
                 this.countNotification();
                 if (chatscreen == "flex") this.socket.emit(E.MESSAGESEEN, { messageID: msg.messageID });
                 else localStorage.setItem("LSTMSGID", msg.messageID);
             }
             else if (msg.sender.visitor) {
-                this.appendMessage(msg.text, false);
+                this.appendMessage({type:"text", text:msg.text}, false, msg.messageID);
             }
         }
     }
@@ -359,6 +388,15 @@ class Visitor {
         const { name, avatarURL } = agent;
         let agentName = document.querySelector("#agent_Name");
         agentName.innerHTML = name + "";
+        document.querySelector("#avatar_img").src = avatarURL;
+    }
+
+    onDeleteMessage(deleteMessage) {
+        const { conversationID, messageIDs } = deleteMessage
+        messageIDs.forEach((itemID)=>{
+            document.getElementById(`message-${itemID}`).outerHTML = "";
+        });
+        // here is where the delete message applied 
     }
 
     onChatClosed() {
@@ -417,6 +455,41 @@ class Visitor {
 
     onError(err) {
         console.log(err);
+    }
+
+    readAndLoadFile(event){
+        console.log("handle upload file here");
+        // let chatMessagesCtr = document.querySelector("#chatMessages");
+        // const messageEl = document.createElement("div");
+        // messageEl.className = `message message-${true ? "from" : "to"}`;
+
+        // messageEl.innerHTML = `<img src="http://localhost:5000/media/f508698762ae309fe3a973fb5b8dcda3" width="100px" height="100px"/>`;
+        // chatMessagesCtr.appendChild(messageEl);
+
+        // const files = event.target.files;
+        // const formData = new FormData();
+        // formData.append('file',files[0]);
+
+        // fetch(`${API_SERVER_URL}/media/upload`, {
+        //     method: 'POST',
+        //     body: formData
+        // })
+        // .then(response => response.json())
+        // .then(data => {
+        //     if(data.success){
+        //         const fileInfo = {
+        //             filename : data.data.filename,
+        //             mimetype : data.data.mimetype,
+        //             size : data.data.size,
+        //             url : data.data.url
+        //         }
+        //     this.onSend(fileInfo);
+        //     }
+        //     else console.log("failed to load");
+        // })
+        // .catch(error => {
+        //     console.error("file error ",error);
+        // })
     }
 }
 
